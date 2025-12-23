@@ -26,8 +26,8 @@ test('stress - extreme inputs', async (t) => {
       'echo "test with spaces"',
       'echo "test\twith\ttabs"',
       'echo "test\nwith\nnewlines"',
-      'echo "test\'with\'quotes"',
-      'echo "test\\"with\\"escaped\\"quotes"',
+      "echo \"test'with'quotes\"",
+      `echo "test\\"with\\"escaped\\"quotes"`,
       'echo "test|with|pipes"',
       'echo "test&with&ampersands"',
       'echo "test;with;semicolons"',
@@ -351,7 +351,7 @@ test('stress - output edge cases', async (t) => {
   await t.test('should handle extremely long single line', () => {
     // Generate a very long single line (1MB)
     const report = detectFlakiness({
-      testCommand: 'node -e "process.stdout.write(\\'x\\'.repeat(1024 * 1024))"',
+      testCommand: `node -e "process.stdout.write('x'.repeat(1024 * 1024))"`,
       runs: 2,
     });
 
@@ -385,7 +385,7 @@ test('stress - output edge cases', async (t) => {
 
   await t.test('should handle only stderr output', () => {
     const report = detectFlakiness({
-      testCommand: 'node -e "console.error(\\'error message\\')"',
+      testCommand: `node -e "console.error('error message')"`,
       runs: 2,
     });
 
@@ -396,7 +396,7 @@ test('stress - output edge cases', async (t) => {
 
   await t.test('should handle mixed stdout and stderr', () => {
     const report = detectFlakiness({
-      testCommand: 'node -e "console.log(\\'out\\'); console.error(\\'err\\')"',
+      testCommand: `node -e "console.log('out'); console.error('err')"`,
       runs: 2,
     });
 
@@ -472,7 +472,7 @@ test('stress - resource exhaustion prevention', async (t) => {
   await t.test('should handle buffer limit gracefully', () => {
     // Try to generate more than 10MB (should be truncated by execSync)
     const report = detectFlakiness({
-      testCommand: 'node -e "console.log(\\'x\\'.repeat(20 * 1024 * 1024))"',
+      testCommand: `node -e "console.log('x'.repeat(20 * 1024 * 1024))"`,
       runs: 1,
     });
 
