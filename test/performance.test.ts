@@ -93,7 +93,7 @@ test('performance - memory usage', async (t) => {
     const initialMemory = process.memoryUsage().heapUsed;
 
     const report = detectFlakiness({
-      testCommand: 'node -e "for(let i=0; i<10000; i++) console.log(\\'test line\\' + i)"',
+      testCommand: `node -e "for(let i=0; i<10000; i++) console.log('test line' + i)"`,
       runs: 10,
     });
 
@@ -171,7 +171,7 @@ test('performance - resource limits', async (t) => {
   await t.test('should handle maximum buffer size (10MB)', () => {
     // Generate ~5MB of output per run
     const report = detectFlakiness({
-      testCommand: 'node -e "console.log(\\'x\\'.repeat(5 * 1024 * 1024))"',
+      testCommand: `node -e "console.log('x'.repeat(5 * 1024 * 1024))"`,
       runs: 2,
     });
 
