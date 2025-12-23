@@ -5,9 +5,6 @@ hero:
   name: Test Flakiness Detector
   text: Find Unreliable Tests
   tagline: Detect flaky tests by running them multiple times and tracking failure rates. Zero dependencies, works with any test framework.
-  image:
-    src: /logo.svg
-    alt: Test Flakiness Detector
   actions:
     - theme: brand
       text: Get Started
@@ -17,39 +14,48 @@ hero:
       link: https://github.com/tuulbelt/tuulbelt/tree/main/test-flakiness-detector
 
 features:
-  - icon: 🎯
+  - icon:
+      src: /icons/target.svg
     title: Framework Agnostic
     details: Works with any test command - npm test, cargo test, pytest, Jest, Mocha, and more. Just pass your test command and let it run.
 
-  - icon: 🔍
+  - icon:
+      src: /icons/search.svg
     title: Detect Flakiness
     details: Runs your tests N times and identifies which ones have intermittent failures. Get detailed failure rates and statistics.
 
-  - icon: 📊
+  - icon:
+      src: /icons/chart.svg
     title: Detailed Reports
     details: Generates comprehensive JSON reports with pass/fail counts, failure rates, and full output capture for debugging.
 
-  - icon: ⚡
+  - icon:
+      src: /icons/zap.svg
     title: Zero Dependencies
     details: Uses only Node.js built-in modules. No npm dependencies to manage, update, or worry about security issues.
 
-  - icon: 🛠️
+  - icon:
+      src: /icons/tool.svg
     title: CLI & Library
     details: Use as a command-line tool for quick checks or integrate as a library in your Node.js projects.
 
-  - icon: 📈
+  - icon:
+      src: /icons/settings.svg
     title: Configurable
     details: Control number of runs (1-1000), enable verbose logging, and customize detection parameters.
 
-  - icon: 🔒
+  - icon:
+      src: /icons/shield.svg
     title: Type Safe
     details: Written in TypeScript with strict mode. Full type definitions for excellent IDE support.
 
-  - icon: 🚀
+  - icon:
+      src: /icons/rocket.svg
     title: Production Ready
     details: 107+ tests covering unit, integration, performance, and stress scenarios. Battle-tested and reliable.
 
-  - icon: 📖
+  - icon:
+      src: /icons/book.svg
     title: Well Documented
     details: Comprehensive documentation, examples, and specifications. Know exactly what you're getting.
 ---
@@ -102,22 +108,17 @@ No runtime dependencies. Just Node.js 18+.
 
 ## Next Steps
 
-<div class="vp-card-container">
-  <a href="/guide/getting-started" class="vp-card">
-    <h3>Getting Started →</h3>
-    <p>Learn how to use the tool in 5 minutes</p>
-  </a>
+::: tip Getting Started
+[Learn how to use the tool in 5 minutes →](/guide/getting-started)
+:::
 
-  <a href="/guide/examples" class="vp-card">
-    <h3>Examples →</h3>
-    <p>See real-world usage examples</p>
-  </a>
+::: tip Examples
+[See real-world usage examples →](/guide/examples)
+:::
 
-  <a href="/api/reference" class="vp-card">
-    <h3>API Reference →</h3>
-    <p>Complete API documentation</p>
-  </a>
-</div>
+::: tip API Reference
+[Complete API documentation →](/api/reference)
+:::
 
 ## Part of Tuulbelt
 
