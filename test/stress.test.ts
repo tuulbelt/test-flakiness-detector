@@ -437,21 +437,24 @@ test('stress - statistical edge cases', async (t) => {
     const tmpDir = join(process.cwd(), 'test', 'tmp');
     mkdirSync(tmpDir, { recursive: true });
 
-    const counterFile = join(tmpDir, 'stress-counter-1.txt');
+    const counterFile = join(tmpDir, `counter-${Date.now()}-stress1.txt`);
+    const testScript = join(tmpDir, `test-${Date.now()}-stress1.sh`);
+
     writeFileSync(counterFile, '0', 'utf-8');
 
-    const testScript = join(tmpDir, 'stress-test-1.js');
-    writeFileSync(testScript, `
-const fs = require('fs');
-const counterFile = '${counterFile.replace(/\\/g, '\\\\')}';
-let count = parseInt(fs.readFileSync(counterFile, 'utf-8'), 10);
-fs.writeFileSync(counterFile, String(count + 1), 'utf-8');
-// Pass only on run 50 (1 out of 100 = 1% success = 99% failure)
-process.exit(count === 50 ? 0 : 1);
-`);
+    writeFileSync(testScript, `#!/bin/bash
+COUNT=\$(cat "${counterFile}")
+echo $((COUNT + 1)) > "${counterFile}"
+# Pass only on run 50 (count=49, 0-indexed), fail all others
+if [ $COUNT -eq 49 ]; then
+  exit 0
+else
+  exit 1
+fi
+`, { mode: 0o755 });
 
     const report = detectFlakiness({
-      testCommand: `node ${testScript}`,
+      testCommand: `bash ${testScript}`,
       runs: 100,
     });
 
@@ -473,21 +476,24 @@ process.exit(count === 50 ? 0 : 1);
     const tmpDir = join(process.cwd(), 'test', 'tmp');
     mkdirSync(tmpDir, { recursive: true });
 
-    const counterFile = join(tmpDir, 'stress-counter-2.txt');
+    const counterFile = join(tmpDir, `counter-${Date.now()}-stress2.txt`);
+    const testScript = join(tmpDir, `test-${Date.now()}-stress2.sh`);
+
     writeFileSync(counterFile, '0', 'utf-8');
 
-    const testScript = join(tmpDir, 'stress-test-2.js');
-    writeFileSync(testScript, `
-const fs = require('fs');
-const counterFile = '${counterFile.replace(/\\/g, '\\\\')}';
-let count = parseInt(fs.readFileSync(counterFile, 'utf-8'), 10);
-fs.writeFileSync(counterFile, String(count + 1), 'utf-8');
-// Fail only on run 50 (1 out of 100 = 1% failure)
-process.exit(count === 50 ? 1 : 0);
-`);
+    writeFileSync(testScript, `#!/bin/bash
+COUNT=\$(cat "${counterFile}")
+echo $((COUNT + 1)) > "${counterFile}"
+# Fail only on run 50 (count=49, 0-indexed), pass all others
+if [ $COUNT -eq 49 ]; then
+  exit 1
+else
+  exit 0
+fi
+`, { mode: 0o755 });
 
     const report = detectFlakiness({
-      testCommand: `node ${testScript}`,
+      testCommand: `bash ${testScript}`,
       runs: 100,
     });
 

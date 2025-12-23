@@ -245,21 +245,20 @@ test('performance - report generation', async (t) => {
     const tmpDir = join(process.cwd(), 'test', 'tmp');
     mkdirSync(tmpDir, { recursive: true });
 
-    const counterFile = join(tmpDir, 'perf-counter-1.txt');
+    const counterFile = join(tmpDir, `counter-${Date.now()}-perf1.txt`);
+    const testScript = join(tmpDir, `test-${Date.now()}-perf1.sh`);
+
     writeFileSync(counterFile, '0', 'utf-8');
 
-    const testScript = join(tmpDir, 'perf-test-1.js');
-    writeFileSync(testScript, `
-const fs = require('fs');
-const counterFile = '${counterFile.replace(/\\/g, '\\\\')}';
-let count = parseInt(fs.readFileSync(counterFile, 'utf-8'), 10);
-fs.writeFileSync(counterFile, String(count + 1), 'utf-8');
-// Fail on odd runs, pass on even runs (exactly 50% failure rate)
-process.exit(count % 2 === 0 ? 0 : 1);
-`);
+    writeFileSync(testScript, `#!/bin/bash
+COUNT=\$(cat "${counterFile}")
+echo $((COUNT + 1)) > "${counterFile}"
+# Fail on even counts, pass on odd counts (50% failure rate)
+exit $(( COUNT % 2 ))
+`, { mode: 0o755 });
 
     const report = detectFlakiness({
-      testCommand: `node ${testScript}`,
+      testCommand: `bash ${testScript}`,
       runs: 100,
     });
 
