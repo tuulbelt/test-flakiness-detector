@@ -4,7 +4,7 @@
  * Detect unreliable tests by running them multiple times and tracking failure rates.
  */
 
-import { execSync } from 'child_process';
+import { spawnSync } from 'child_process';
 
 /**
  * Configuration options for flakiness detection
@@ -81,27 +81,26 @@ function runTestOnce(command: string, verbose: boolean): TestRunResult {
   }
 
   try {
-    const stdout = execSync(command, {
+    const result = spawnSync(command, {
       encoding: 'utf-8',
-      stdio: ['pipe', 'pipe', 'pipe'],
+      shell: true,
       maxBuffer: 10 * 1024 * 1024, // 10MB buffer
     });
 
     return {
-      success: true,
-      exitCode: 0,
-      stdout,
-      stderr: '',
+      success: result.status === 0,
+      exitCode: result.status ?? 1,
+      stdout: result.stdout || '',
+      stderr: result.stderr || '',
     };
   } catch (error: unknown) {
-    // execSync throws when exit code is non-zero
-    const execError = error as { status?: number; stdout?: string; stderr?: string };
-
+    // Handle cases where spawnSync throws (e.g., null bytes in command)
+    const err = error as Error;
     return {
       success: false,
-      exitCode: execError.status ?? 1,
-      stdout: execError.stdout ?? '',
-      stderr: execError.stderr ?? '',
+      exitCode: 1,
+      stdout: '',
+      stderr: err.message || 'Command execution failed',
     };
   }
 }
@@ -143,7 +142,7 @@ export function detectFlakiness(config: Config): FlakinessReport {
     };
   }
 
-  if (runs < 1 || runs > 1000) {
+  if (typeof runs !== 'number' || !Number.isFinite(runs) || runs < 1 || runs > 1000) {
     return {
       success: false,
       totalRuns: 0,

@@ -52,12 +52,12 @@ test('integration - Node.js native test runner', async (t) => {
 
     const report = detectFlakiness({
       testCommand: `node --test ${testFile}`,
-      runs: 20,
+      runs: 50, // Increased from 20 to reduce statistical edge cases (p < 10^-15 for all same)
       verbose: false,
     });
 
     assert.strictEqual(report.success, true);
-    assert.strictEqual(report.totalRuns, 20);
+    assert.strictEqual(report.totalRuns, 50);
 
     // Should have both passes and failures (statistically)
     assert(report.passedRuns > 0, 'Should have some passed runs');
