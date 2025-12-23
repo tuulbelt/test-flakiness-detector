@@ -39,16 +39,24 @@ test('integration - Node.js native test runner', async (t) => {
   await t.test('should detect flaky Node.js tests', () => {
     // Create a fixture test file with a flaky test
     const testFile = join(FIXTURES_DIR, 'flaky-node-test.js');
-    writeFileSync(testFile, `
-      import { test } from 'node:test';
-      import assert from 'node:assert/strict';
+    const counterFile = join(FIXTURES_DIR, 'counter.txt');
 
-      test('flaky test', () => {
-        // Fails 50% of the time
-        const shouldPass = Math.random() > 0.5;
-        assert.strictEqual(shouldPass, true);
-      });
-    `);
+    // Initialize counter
+    writeFileSync(counterFile, '0', 'utf-8');
+
+    // Use file-based counter for deterministic flakiness
+    writeFileSync(testFile, `import { test } from 'node:test';
+import assert from 'node:assert/strict';
+import { readFileSync, writeFileSync } from 'fs';
+
+test('flaky test', () => {
+  const counterFile = '${counterFile}';
+  const count = parseInt(readFileSync(counterFile, 'utf-8'), 10);
+  writeFileSync(counterFile, String(count + 1), 'utf-8');
+  // Fails every other run
+  const shouldPass = count % 2 === 0;
+  assert.strictEqual(shouldPass, true);
+});`);
 
     const report = detectFlakiness({
       testCommand: `node --test ${testFile}`,
