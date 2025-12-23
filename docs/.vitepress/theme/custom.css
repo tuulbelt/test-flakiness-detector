@@ -7,3 +7,18 @@
 .vp-feature-icon svg {
   stroke: currentColor;
 }
+
+/* Right-align search bar */
+.VPNavBar .content {
+  justify-content: space-between;
+}
+
+.VPNavBar .search {
+  order: 999;
+  margin-left: auto;
+}
+
+/* Adjust search width */
+.VPNavBar .VPLocalSearchBox {
+  margin-left: auto;
+}
