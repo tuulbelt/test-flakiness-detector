@@ -1,0 +1,30 @@
+{
+  "name": "@tuulbelt/test-flakiness-detector",
+  "version": "0.1.0",
+  "description": "Detect unreliable tests by running them multiple times and tracking failure rates",
+  "main": "src/index.ts",
+  "type": "module",
+  "scripts": {
+    "build": "tsc",
+    "test": "node --import tsx --test test/index.test.ts",
+    "test:watch": "node --import tsx --test --watch test/index.test.ts"
+  },
+  "keywords": [
+    "tuulbelt",
+    "testing",
+    "flakiness",
+    "test-reliability"
+  ],
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/tuulbelt/test-flakiness-detector.git"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  },
+  "devDependencies": {
+    "tsx": "^4.7.0",
+    "typescript": "^5.3.0"
+  }
+}
