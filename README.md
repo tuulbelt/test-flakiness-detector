@@ -167,6 +167,153 @@ This will show:
 [WARN] Detected flaky tests!
 ```
 
+## Example Outputs
+
+See what to expect from the tool with these real examples:
+
+<details>
+<summary>📊 Example 1: All Tests Passing (click to expand)</summary>
+
+```bash
+npx tsx src/index.ts --test "echo 'test passed'" --runs 5
+```
+
+```json
+{
+  "success": true,
+  "totalRuns": 5,
+  "passedRuns": 5,
+  "failedRuns": 0,
+  "flakyTests": [],
+  "runs": [
+    {
+      "success": true,
+      "exitCode": 0,
+      "stdout": "test passed\n",
+      "stderr": ""
+    }
+    // ... 4 more successful runs
+  ]
+}
+```
+
+**Result:** ✅ No flaky tests detected. All 5 runs passed consistently.
+
+</details>
+
+<details>
+<summary>📊 Example 2: All Tests Failing (click to expand)</summary>
+
+```bash
+npx tsx src/index.ts --test "exit 1" --runs 3
+```
+
+```json
+{
+  "success": true,
+  "totalRuns": 3,
+  "passedRuns": 0,
+  "failedRuns": 3,
+  "flakyTests": [],
+  "runs": [
+    {
+      "success": false,
+      "exitCode": 1,
+      "stdout": "",
+      "stderr": ""
+    }
+    // ... 2 more failed runs
+  ]
+}
+```
+
+**Result:** ✅ No flakiness detected. Tests fail consistently (not intermittent).
+
+</details>
+
+<details>
+<summary>🔴 Example 3: Flaky Tests Detected (click to expand)</summary>
+
+```bash
+npx tsx src/index.ts --test 'node -e "process.exit(Math.random() > 0.5 ? 0 : 1)"' --runs 20
+```
+
+```json
+{
+  "success": true,
+  "totalRuns": 20,
+  "passedRuns": 11,
+  "failedRuns": 9,
+  "flakyTests": [
+    {
+      "testName": "Test Suite",
+      "passed": 11,
+      "failed": 9,
+      "totalRuns": 20,
+      "failureRate": 45.0
+    }
+  ],
+  "runs": [
+    // Mix of passing and failing runs
+  ]
+}
+```
+
+**Result:** ⚠️ **Flaky test detected!** 45% failure rate (9 failures out of 20 runs).
+**Action:** This test needs investigation and fixing.
+
+</details>
+
+<details>
+<summary>💬 Example 4: Verbose Mode Output (click to expand)</summary>
+
+```bash
+npx tsx src/index.ts --test "echo 'test'" --runs 3 --verbose
+```
+
+```
+[INFO] Running test command 3 times: echo 'test'
+[INFO] Run 1/3
+[RUN] Executing: echo 'test'
+[INFO] Run 2/3
+[RUN] Executing: echo 'test'
+[INFO] Run 3/3
+[RUN] Executing: echo 'test'
+[INFO] Completed 3 runs: 3 passed, 0 failed
+{
+  "success": true,
+  "totalRuns": 3,
+  "passedRuns": 3,
+  "failedRuns": 0,
+  "flakyTests": [],
+  ...
+}
+```
+
+**Result:** Shows detailed execution logs plus JSON output.
+
+</details>
+
+> **Note:** Example outputs are auto-generated and committed to [`examples/outputs/`](examples/outputs/) directory.
+> See [`.github/workflows/update-demos.yml`](.github/workflows/update-demos.yml) for automation details.
+
+## Try It Yourself
+
+### Quick Start
+
+```bash
+git clone https://github.com/tuulbelt/test-flakiness-detector.git
+cd test-flakiness-detector
+npm install
+npx tsx src/index.ts --test "npm test" --runs 10
+```
+
+### One-Click Playground
+
+[![Open in StackBlitz](https://developer.stackblitz.com/img/open_in_stackblitz.svg)](https://stackblitz.com/github/tuulbelt/tuulbelt/tree/main/test-flakiness-detector)
+
+Try the tool instantly in your browser without installing anything!
+
 ## How It Works
 
 1. The tool executes the specified test command N times

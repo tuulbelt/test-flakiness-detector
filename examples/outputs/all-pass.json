@@ -1,0 +1,39 @@
+{
+  "success": true,
+  "totalRuns": 5,
+  "passedRuns": 5,
+  "failedRuns": 0,
+  "flakyTests": [],
+  "runs": [
+    {
+      "success": true,
+      "exitCode": 0,
+      "stdout": "test passed\n",
+      "stderr": ""
+    },
+    {
+      "success": true,
+      "exitCode": 0,
+      "stdout": "test passed\n",
+      "stderr": ""
+    },
+    {
+      "success": true,
+      "exitCode": 0,
+      "stdout": "test passed\n",
+      "stderr": ""
+    },
+    {
+      "success": true,
+      "exitCode": 0,
+      "stdout": "test passed\n",
+      "stderr": ""
+    },
+    {
+      "success": true,
+      "exitCode": 0,
+      "stdout": "test passed\n",
+      "stderr": ""
+    }
+  ]
+}
