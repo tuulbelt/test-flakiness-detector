@@ -1,31 +1,19 @@
 {
   "success": true,
   "totalRuns": 20,
-  "passedRuns": 13,
-  "failedRuns": 7,
+  "passedRuns": 14,
+  "failedRuns": 6,
   "flakyTests": [
     {
       "testName": "Test Suite",
-      "passed": 13,
-      "failed": 7,
+      "passed": 14,
+      "failed": 6,
       "totalRuns": 20,
-      "failureRate": 35
+      "failureRate": 30
     }
   ],
   "runs": [
     {
-      "success": false,
-      "exitCode": 1,
-      "stdout": "",
-      "stderr": ""
-    },
-    {
-      "success": true,
-      "exitCode": 0,
-      "stdout": "",
-      "stderr": ""
-    },
-    {
       "success": true,
       "exitCode": 0,
       "stdout": "",
@@ -40,12 +28,6 @@
     {
       "success": false,
       "exitCode": 1,
-      "stdout": "",
-      "stderr": ""
-    },
-    {
-      "success": true,
-      "exitCode": 0,
       "stdout": "",
       "stderr": ""
     },
@@ -86,36 +68,6 @@
       "stderr": ""
     },
     {
-      "success": false,
-      "exitCode": 1,
-      "stdout": "",
-      "stderr": ""
-    },
-    {
-      "success": true,
-      "exitCode": 0,
-      "stdout": "",
-      "stderr": ""
-    },
-    {
-      "success": true,
-      "exitCode": 0,
-      "stdout": "",
-      "stderr": ""
-    },
-    {
-      "success": true,
-      "exitCode": 0,
-      "stdout": "",
-      "stderr": ""
-    },
-    {
-      "success": true,
-      "exitCode": 0,
-      "stdout": "",
-      "stderr": ""
-    },
-    {
       "success": true,
       "exitCode": 0,
       "stdout": "",
@@ -130,6 +82,54 @@
     {
       "success": false,
       "exitCode": 1,
+      "stdout": "",
+      "stderr": ""
+    },
+    {
+      "success": true,
+      "exitCode": 0,
+      "stdout": "",
+      "stderr": ""
+    },
+    {
+      "success": true,
+      "exitCode": 0,
+      "stdout": "",
+      "stderr": ""
+    },
+    {
+      "success": true,
+      "exitCode": 0,
+      "stdout": "",
+      "stderr": ""
+    },
+    {
+      "success": true,
+      "exitCode": 0,
+      "stdout": "",
+      "stderr": ""
+    },
+    {
+      "success": true,
+      "exitCode": 0,
+      "stdout": "",
+      "stderr": ""
+    },
+    {
+      "success": false,
+      "exitCode": 1,
+      "stdout": "",
+      "stderr": ""
+    },
+    {
+      "success": true,
+      "exitCode": 0,
+      "stdout": "",
+      "stderr": ""
+    },
+    {
+      "success": true,
+      "exitCode": 0,
       "stdout": "",
       "stderr": ""
     }
