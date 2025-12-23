@@ -25,7 +25,8 @@
   "license": "MIT",
   "repository": {
     "type": "git",
-    "url": "https://github.com/tuulbelt/test-flakiness-detector.git"
+    "url": "https://github.com/tuulbelt/tuulbelt.git",
+    "directory": "test-flakiness-detector"
   },
   "engines": {
     "node": ">=18.0.0"

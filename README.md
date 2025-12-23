@@ -32,8 +32,8 @@ This tool runs your test command multiple times and identifies which tests have 
 Clone the repository:
 
 ```bash
-git clone https://github.com/tuulbelt/test-flakiness-detector.git
-cd test-flakiness-detector
+git clone https://github.com/tuulbelt/tuulbelt.git
+cd tuulbelt/test-flakiness-detector
 npm install  # Install dev dependencies only
 ```
 
@@ -302,8 +302,8 @@ npx tsx src/index.ts --test "echo 'test'" --runs 3 --verbose
 ### Quick Start
 
 ```bash
-git clone https://github.com/tuulbelt/test-flakiness-detector.git
-cd test-flakiness-detector
+git clone https://github.com/tuulbelt/tuulbelt.git
+cd tuulbelt/test-flakiness-detector
 npm install
 npx tsx src/index.ts --test "npm test" --runs 10
 ```
@@ -375,4 +375,4 @@ MIT — see [LICENSE](LICENSE)
 ## Contributing
 
 Found a bug or want to contribute? Open an issue at:
-https://github.com/tuulbelt/test-flakiness-detector/issues
+https://github.com/tuulbelt/tuulbelt/issues (use label: `test-flakiness-detector`)
