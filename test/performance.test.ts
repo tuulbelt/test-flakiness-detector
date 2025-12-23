@@ -6,6 +6,8 @@
 
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
+import { writeFileSync, rmSync, mkdirSync } from 'node:fs';
+import { join } from 'node:path';
 import { detectFlakiness } from '../src/index.js';
 
 test('performance - execution speed', async (t) => {
@@ -219,8 +221,9 @@ test('performance - report generation', async (t) => {
   await t.test('should generate reports quickly even with many runs', () => {
     const start = performance.now();
 
+    // Use a simple deterministic test (all pass)
     const report = detectFlakiness({
-      testCommand: 'node -e "process.exit(Math.random() > 0.5 ? 0 : 1)"',
+      testCommand: 'exit 0',
       runs: 100,
     });
 
@@ -238,22 +241,45 @@ test('performance - report generation', async (t) => {
   });
 
   await t.test('should calculate failure rates accurately', () => {
-    // Run a test that fails exactly 50% of the time (statistically)
+    // Create deterministic flaky test (50% failure rate)
+    const tmpDir = join(process.cwd(), 'test', 'tmp');
+    mkdirSync(tmpDir, { recursive: true });
+
+    const counterFile = join(tmpDir, 'perf-counter-1.txt');
+    writeFileSync(counterFile, '0', 'utf-8');
+
+    const testScript = join(tmpDir, 'perf-test-1.js');
+    writeFileSync(testScript, `
+const fs = require('fs');
+const counterFile = '${counterFile.replace(/\\/g, '\\\\')}';
+let count = parseInt(fs.readFileSync(counterFile, 'utf-8'), 10);
+fs.writeFileSync(counterFile, String(count + 1), 'utf-8');
+// Fail on odd runs, pass on even runs (exactly 50% failure rate)
+process.exit(count % 2 === 0 ? 0 : 1);
+`);
+
     const report = detectFlakiness({
-      testCommand: 'node -e "process.exit(Math.random() > 0.5 ? 0 : 1)"',
+      testCommand: `node ${testScript}`,
       runs: 100,
     });
 
-    if (report.flakyTests.length > 0) {
-      const failureRate = report.flakyTests[0].failureRate;
-
-      // Failure rate should be calculated correctly
-      const expectedRate = (report.failedRuns / report.totalRuns) * 100;
-      assert.strictEqual(failureRate, expectedRate);
-
-      // Should be somewhere between 30% and 70% (statistically likely)
-      assert(failureRate > 30 && failureRate < 70);
+    // Clean up
+    try {
+      rmSync(counterFile);
+      rmSync(testScript);
+    } catch (err) {
+      // Ignore cleanup errors
     }
+
+    assert.strictEqual(report.flakyTests.length, 1);
+    const failureRate = report.flakyTests[0].failureRate;
+
+    // Failure rate should be calculated correctly
+    const expectedRate = (report.failedRuns / report.totalRuns) * 100;
+    assert.strictEqual(failureRate, expectedRate);
+
+    // Deterministic: exactly 50% failure rate
+    assert.strictEqual(failureRate, 50);
   });
 });
 

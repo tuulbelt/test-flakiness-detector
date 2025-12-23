@@ -6,6 +6,8 @@
 
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
+import { writeFileSync, rmSync, mkdirSync } from 'node:fs';
+import { join } from 'node:path';
 import { detectFlakiness } from '../src/index.js';
 
 test('stress - extreme inputs', async (t) => {
@@ -431,30 +433,75 @@ test('stress - statistical edge cases', async (t) => {
   });
 
   await t.test('should calculate correct failure rate for extreme flakiness', () => {
-    // Test that fails 99% of the time (using random with bias)
+    // Create deterministic test that fails 99% of the time (1 pass out of 100)
+    const tmpDir = join(process.cwd(), 'test', 'tmp');
+    mkdirSync(tmpDir, { recursive: true });
+
+    const counterFile = join(tmpDir, 'stress-counter-1.txt');
+    writeFileSync(counterFile, '0', 'utf-8');
+
+    const testScript = join(tmpDir, 'stress-test-1.js');
+    writeFileSync(testScript, `
+const fs = require('fs');
+const counterFile = '${counterFile.replace(/\\/g, '\\\\')}';
+let count = parseInt(fs.readFileSync(counterFile, 'utf-8'), 10);
+fs.writeFileSync(counterFile, String(count + 1), 'utf-8');
+// Pass only on run 50 (1 out of 100 = 1% success = 99% failure)
+process.exit(count === 50 ? 0 : 1);
+`);
+
     const report = detectFlakiness({
-      testCommand: 'node -e "process.exit(Math.random() > 0.99 ? 0 : 1)"',
+      testCommand: `node ${testScript}`,
       runs: 100,
     });
 
-    if (report.flakyTests.length > 0) {
-      // Should have very high failure rate
-      assert(report.flakyTests[0].failureRate > 90);
+    // Clean up
+    try {
+      rmSync(counterFile);
+      rmSync(testScript);
+    } catch (err) {
+      // Ignore cleanup errors
     }
+
+    assert.strictEqual(report.flakyTests.length, 1);
+    // Exactly 99% failure rate (99 fails, 1 pass)
+    assert.strictEqual(report.flakyTests[0].failureRate, 99);
   });
 
   await t.test('should calculate correct failure rate for rare flakiness', () => {
-    // Test that fails 1% of the time
+    // Create deterministic test that fails 1% of the time (1 fail out of 100)
+    const tmpDir = join(process.cwd(), 'test', 'tmp');
+    mkdirSync(tmpDir, { recursive: true });
+
+    const counterFile = join(tmpDir, 'stress-counter-2.txt');
+    writeFileSync(counterFile, '0', 'utf-8');
+
+    const testScript = join(tmpDir, 'stress-test-2.js');
+    writeFileSync(testScript, `
+const fs = require('fs');
+const counterFile = '${counterFile.replace(/\\/g, '\\\\')}';
+let count = parseInt(fs.readFileSync(counterFile, 'utf-8'), 10);
+fs.writeFileSync(counterFile, String(count + 1), 'utf-8');
+// Fail only on run 50 (1 out of 100 = 1% failure)
+process.exit(count === 50 ? 1 : 0);
+`);
+
     const report = detectFlakiness({
-      testCommand: 'node -e "process.exit(Math.random() > 0.01 ? 1 : 0)"',
+      testCommand: `node ${testScript}`,
       runs: 100,
     });
 
-    if (report.flakyTests.length > 0) {
-      // Should have very low failure rate (but >0)
-      assert(report.flakyTests[0].failureRate < 10);
-      assert(report.flakyTests[0].failureRate > 0);
+    // Clean up
+    try {
+      rmSync(counterFile);
+      rmSync(testScript);
+    } catch (err) {
+      // Ignore cleanup errors
     }
+
+    assert.strictEqual(report.flakyTests.length, 1);
+    // Exactly 1% failure rate (1 fail, 99 pass)
+    assert.strictEqual(report.flakyTests[0].failureRate, 1);
   });
 });
 

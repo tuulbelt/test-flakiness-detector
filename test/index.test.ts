@@ -4,6 +4,8 @@
 
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
+import { writeFileSync, rmSync, mkdirSync } from 'node:fs';
+import { join } from 'node:path';
 import { detectFlakiness } from '../src/index.js';
 import type { Config, FlakinessReport } from '../src/index.js';
 
@@ -123,20 +125,44 @@ test('detectFlakiness - input validation', async (t) => {
 
 test('detectFlakiness - flaky test detection', async (t) => {
   await t.test('should detect flaky tests with intermittent failures', () => {
-    // Create a flaky test using a script that randomly fails
+    // Create deterministic flaky test using file counter with proper cleanup
+    const tmpDir = join(process.cwd(), 'test', 'tmp');
+    mkdirSync(tmpDir, { recursive: true });
+
+    // Use unique filename to avoid conflicts
+    const counterFile = join(tmpDir, `counter-${Date.now()}-1.txt`);
+    const testScript = join(tmpDir, `test-${Date.now()}-1.sh`);
+
+    // Initialize counter BEFORE test
+    writeFileSync(counterFile, '0', 'utf-8');
+
+    writeFileSync(testScript, `#!/bin/bash
+COUNT=\$(cat "${counterFile}")
+echo $((COUNT + 1)) > "${counterFile}"
+# Fail on even counts (0,2,4...), pass on odd (1,3,5...)
+exit $(( COUNT % 2 ))
+`, { mode: 0o755 });
+
     const report = detectFlakiness({
-      testCommand: 'node -e "process.exit(Math.random() > 0.5 ? 0 : 1)"',
+      testCommand: `bash ${testScript}`,
       runs: 100,
       verbose: false,
     });
 
+    // Clean up
+    try {
+      rmSync(counterFile);
+      rmSync(testScript);
+    } catch (err) {
+      // Ignore cleanup errors
+    }
+
     assert.strictEqual(report.success, true);
     assert.strictEqual(report.totalRuns, 100);
 
-    // With 100 runs and 50% failure rate, we should have both passes and fails
-    // (statistically, it's extremely unlikely to have all passes or all fails)
-    assert(report.passedRuns > 0, 'Should have some passed runs');
-    assert(report.failedRuns > 0, 'Should have some failed runs');
+    // Deterministic: exactly 50 passes (odd counts), 50 fails (even counts)
+    assert.strictEqual(report.passedRuns, 50, 'Should have 50 passed runs');
+    assert.strictEqual(report.failedRuns, 50, 'Should have 50 failed runs');
     assert.strictEqual(
       report.passedRuns + report.failedRuns,
       100,
@@ -147,29 +173,54 @@ test('detectFlakiness - flaky test detection', async (t) => {
     assert.strictEqual(report.flakyTests.length, 1);
     assert.strictEqual(report.flakyTests[0].testName, 'Test Suite');
     assert.strictEqual(report.flakyTests[0].totalRuns, 100);
-    assert.strictEqual(report.flakyTests[0].passed, report.passedRuns);
-    assert.strictEqual(report.flakyTests[0].failed, report.failedRuns);
-
-    // Failure rate should be between 0 and 100
-    const failureRate = report.flakyTests[0].failureRate;
-    assert(failureRate > 0 && failureRate < 100);
+    assert.strictEqual(report.flakyTests[0].passed, 50);
+    assert.strictEqual(report.flakyTests[0].failed, 50);
+    assert.strictEqual(report.flakyTests[0].failureRate, 50);
   });
 
   await t.test('should calculate correct failure rate', () => {
-    // Create a test that fails 30% of the time
+    // Create a deterministic test that fails 30% of the time
+    const tmpDir = join(process.cwd(), 'test', 'tmp');
+    mkdirSync(tmpDir, { recursive: true });
+
+    const counterFile = join(tmpDir, `counter-${Date.now()}-2.txt`);
+    const testScript = join(tmpDir, `test-${Date.now()}-2.sh`);
+
+    // Initialize counter
+    writeFileSync(counterFile, '0', 'utf-8');
+
+    writeFileSync(testScript, `#!/bin/bash
+COUNT=\$(cat "${counterFile}")
+echo $((COUNT + 1)) > "${counterFile}"
+# Fail first 30 runs (0-29), pass remaining 70 (30-99)
+if [ $COUNT -lt 30 ]; then
+  exit 1
+else
+  exit 0
+fi
+`, { mode: 0o755 });
+
     const report = detectFlakiness({
-      testCommand: 'node -e "process.exit(Math.random() > 0.7 ? 0 : 1)"',
+      testCommand: `bash ${testScript}`,
       runs: 100,
       verbose: false,
     });
 
-    if (report.flakyTests.length > 0) {
-      const failureRate = report.flakyTests[0].failureRate;
-      assert.strictEqual(
-        failureRate,
-        (report.flakyTests[0].failed / 100) * 100
-      );
+    // Clean up
+    try {
+      rmSync(counterFile);
+      rmSync(testScript);
+    } catch (err) {
+      // Ignore cleanup errors
     }
+
+    assert.strictEqual(report.flakyTests.length, 1);
+    const failureRate = report.flakyTests[0].failureRate;
+    assert.strictEqual(failureRate, 30);
+    assert.strictEqual(
+      failureRate,
+      (report.flakyTests[0].failed / 100) * 100
+    );
   });
 });
 
@@ -320,19 +371,41 @@ test('FlakinessReport structure', async (t) => {
   });
 
   await t.test('flaky test should have all required fields', () => {
-    // Force a flaky result
+    // Create deterministic flaky result
+    const tmpDir = join(process.cwd(), 'test', 'tmp');
+    mkdirSync(tmpDir, { recursive: true });
+
+    const counterFile = join(tmpDir, `counter-${Date.now()}-3.txt`);
+    const testScript = join(tmpDir, `test-${Date.now()}-3.sh`);
+
+    writeFileSync(counterFile, '0', 'utf-8');
+
+    writeFileSync(testScript, `#!/bin/bash
+COUNT=\$(cat "${counterFile}")
+echo $((COUNT + 1)) > "${counterFile}"
+# Fail on even counts, pass on odd counts (50% failure rate)
+exit $(( COUNT % 2 ))
+`, { mode: 0o755 });
+
     const report = detectFlakiness({
-      testCommand: 'node -e "process.exit(Math.random() > 0.5 ? 0 : 1)"',
+      testCommand: `bash ${testScript}`,
       runs: 50,
     });
 
-    if (report.flakyTests.length > 0) {
-      const flakyTest = report.flakyTests[0];
-      assert.strictEqual(typeof flakyTest.testName, 'string');
-      assert.strictEqual(typeof flakyTest.passed, 'number');
-      assert.strictEqual(typeof flakyTest.failed, 'number');
-      assert.strictEqual(typeof flakyTest.totalRuns, 'number');
-      assert.strictEqual(typeof flakyTest.failureRate, 'number');
+    // Clean up
+    try {
+      rmSync(counterFile);
+      rmSync(testScript);
+    } catch (err) {
+      // Ignore cleanup errors
     }
+
+    assert.strictEqual(report.flakyTests.length, 1);
+    const flakyTest = report.flakyTests[0];
+    assert.strictEqual(typeof flakyTest.testName, 'string');
+    assert.strictEqual(typeof flakyTest.passed, 'number');
+    assert.strictEqual(typeof flakyTest.failed, 'number');
+    assert.strictEqual(typeof flakyTest.totalRuns, 'number');
+    assert.strictEqual(typeof flakyTest.failureRate, 'number');
   });
 });
