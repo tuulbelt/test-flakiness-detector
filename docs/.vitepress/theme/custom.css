@@ -1,24 +1,45 @@
-/* Icon dark mode styling */
-.dark .vp-feature-icon svg {
-  stroke: rgba(255, 255, 255, 0.9);
+/* Icon dark mode styling - force white in dark mode */
+.dark .vp-feature-icon svg,
+.dark .VPFeature .icon svg {
+  stroke: #ffffff !important;
+  fill: none !important;
 }
 
 /* Ensure icons remain visible in light mode */
-.vp-feature-icon svg {
+.vp-feature-icon svg,
+.VPFeature .icon svg {
   stroke: currentColor;
 }
 
-/* Right-align search bar */
-.VPNavBar .content {
+/* Navbar layout: Title left, everything else right */
+.VPNavBar .container {
+  display: flex;
   justify-content: space-between;
 }
 
-.VPNavBar .search {
-  order: 999;
+.VPNavBar .title {
+  flex: 0 0 auto;
+}
+
+.VPNavBar .content {
+  flex: 1;
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+  gap: 1rem;
+}
+
+.VPNavBar .content-body {
+  display: flex;
+  align-items: center;
+  gap: 1.5rem;
   margin-left: auto;
 }
 
-/* Adjust search width */
+.VPNavBar nav {
+  margin: 0 !important;
+}
+
 .VPNavBar .VPLocalSearchBox {
-  margin-left: auto;
+  margin: 0 !important;
 }
