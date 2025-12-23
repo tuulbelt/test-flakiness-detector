@@ -3,7 +3,7 @@ import { defineConfig } from 'vitepress'
 export default defineConfig({
   title: 'Test Flakiness Detector',
   description: 'Detect unreliable tests by running them multiple times and tracking failure rates',
-  base: '/test-flakiness-detector/',
+  base: '/tuulbelt/',
 
   themeConfig: {
     nav: [
