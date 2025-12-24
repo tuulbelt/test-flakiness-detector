@@ -120,6 +120,31 @@ No runtime dependencies. Just Node.js 18+.
 [Complete API documentation →](/api/reference)
 :::
 
+## Dogfooding: Tools Working Together
+
+This tool demonstrates Tuulbelt's composability:
+
+**Uses CLI Progress Reporting** — When running ≥5 iterations, the flakiness detector integrates [CLI Progress Reporting](../../cli-progress-reporting/) to show real-time progress updates:
+
+```bash
+npx tsx src/index.ts --test "npm test" --runs 20 --verbose
+# [INFO] Progress tracking enabled (dogfooding cli-progress-reporting)
+# [INFO] Run 1/20
+# [INFO] Run 2/20 passed (2 passed, 0 failed)
+```
+
+This provides live run counts and pass/fail status during long detection runs.
+
+**Validates Other Tools** — The [Cross-Platform Path Normalizer](../../cross-platform-path-normalizer/) uses this detector to validate its 145 tests are non-flaky:
+
+```bash
+cd ../cross-platform-path-normalizer
+npm run test:dogfood
+# ✅ NO FLAKINESS DETECTED (145 tests × 10 runs = 1,450 executions)
+```
+
+This creates a **bidirectional validation network** where tools prove their reliability by using each other.
+
 ## Part of Tuulbelt
 
 This tool is part of [Tuulbelt](https://github.com/tuulbelt/tuulbelt) - a collection of focused, zero-dependency tools for modern software development.

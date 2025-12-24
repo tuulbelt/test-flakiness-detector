@@ -353,6 +353,36 @@ The test suite includes:
 - Flaky test detection tests
 - Edge case handling tests
 - Error scenario tests
+- Property-based fuzzy tests (24 tests)
+
+### Dogfooding: Tool Composition
+
+This tool demonstrates how Tuulbelt tools work together:
+
+**1. Uses CLI Progress Reporting (when in monorepo)**
+```bash
+npx tsx src/index.ts --test "npm test" --runs 10 --verbose
+# [INFO] Progress tracking enabled (dogfooding cli-progress-reporting)
+# [INFO] Run 1/10
+# [INFO] Run 2/10
+# ...
+```
+
+The flakiness detector integrates **cli-progress-reporting** to show real-time progress during detection (≥5 runs). This provides:
+- Live run counts and pass/fail status
+- Better UX for long detection runs (50-100 iterations)
+- Real-world validation of the progress reporting tool
+- Graceful fallback when cloned standalone
+
+**2. Validated by Cross-Platform Path Normalizer**
+
+The path normalizer uses this tool to verify its 145 tests are non-flaky:
+```bash
+cd ../cross-platform-path-normalizer
+npm run test:dogfood
+# ✅ NO FLAKINESS DETECTED
+# All 10 test runs passed consistently
+```
 
 ## Error Handling
 
