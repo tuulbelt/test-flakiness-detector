@@ -376,12 +376,12 @@ See [SPEC.md](SPEC.md) for detailed technical specification.
 
 **[▶ View interactive recording on asciinema.org](https://asciinema.org/a/WgUQsHvqswlUFvfJekVH07jXi)**
 
-<p style="display: flex; align-items: center; gap: 0.5rem;">
-  <strong>Try it online:</strong>
-  <a href="https://stackblitz.com/github/tuulbelt/tuulbelt/tree/main/test-flakiness-detector">
-    <img src="https://developer.stackblitz.com/img/open_in_stackblitz.svg" alt="Open in StackBlitz">
+<div>
+  <span style="display: inline-block; vertical-align: middle; margin-right: 8px;"><strong>Try it online:</strong></span>
+  <a href="https://stackblitz.com/github/tuulbelt/tuulbelt/tree/main/test-flakiness-detector" style="display: inline-block; vertical-align: middle;">
+    <img src="https://developer.stackblitz.com/img/open_in_stackblitz.svg" alt="Open in StackBlitz" style="vertical-align: middle;">
   </a>
-</p>
+</div>
 
 ## License
 
@@ -389,5 +389,10 @@ MIT — see [LICENSE](LICENSE)
 
 ## Contributing
 
-Found a bug or want to contribute? Open an issue at:
-https://github.com/tuulbelt/tuulbelt/issues (use label: `test-flakiness-detector`)
+See [CONTRIBUTING.md](../CONTRIBUTING.md) for contribution guidelines.
+
+## Related Tools
+
+Part of the [Tuulbelt](https://github.com/tuulbelt/tuulbelt) collection:
+- [CLI Progress Reporting](../cli-progress-reporting/) — Concurrent-safe progress updates
+- More tools coming soon...
