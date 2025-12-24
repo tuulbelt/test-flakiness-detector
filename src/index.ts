@@ -236,7 +236,7 @@ export async function detectFlakiness(config: Config): Promise<FlakinessReport> 
   // Mark progress as complete
   if (progress && runs >= 5) {
     const summary = flakyTests.length > 0
-      ? `Flakiness detected: ${flakyTests[0].failureRate.toFixed(1)}% failure rate`
+      ? `Flakiness detected: ${flakyTests[0]!.failureRate.toFixed(1)}% failure rate`
       : 'No flakiness detected';
     progress.finish(summary, { id: progressId });
   }
