@@ -5,7 +5,7 @@
 ![Version](https://img.shields.io/badge/version-0.1.0-blue)
 ![Node](https://img.shields.io/badge/node-%3E%3D18.0.0-brightgreen)
 ![Zero Dependencies](https://img.shields.io/badge/dependencies-0-success)
-![Tests](https://img.shields.io/badge/tests-107%2B%20passing-success)
+![Tests](https://img.shields.io/badge/tests-148%2B%20passing-success)
 [![License](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
 
 Detect unreliable tests by running them multiple times and tracking failure rates.
@@ -322,6 +322,24 @@ Try the tool instantly in your browser without installing anything!
 4. If some runs pass and some fail, the test suite is flagged as flaky
 5. A detailed JSON report is generated with failure statistics
 
+## Architecture
+
+**Execution Strategy:**
+1. Validate input (test command is non-empty string, runs are between 1-1000)
+2. Execute test command synchronously N times using `child_process.execSync`
+3. Capture exit code, stdout, and stderr for each execution
+4. Record pass (exit code 0) or fail (non-zero exit code) for each run
+5. Calculate flakiness: if passedRuns > 0 AND failedRuns > 0, tests are flaky
+6. Generate comprehensive JSON report with all run results and statistics
+
+**No external dependencies** — Uses only Node.js `child_process` module for command execution.
+
+**Key Design Choices:**
+- **Synchronous execution**: Tests run sequentially to avoid false flakiness from resource contention
+- **Suite-level detection**: Tracks entire test command success/failure, not individual test names
+- **No timeout**: Waits for command completion to avoid flagging slow tests as flaky
+- **Result pattern**: Returns structured result object, never throws exceptions
+
 ## Testing
 
 ```bash
@@ -346,6 +364,16 @@ The tool handles various error scenarios gracefully:
 - Empty or malformed input
 
 Errors are returned in the `error` field of the result object, not thrown.
+
+## Performance
+
+- **Time complexity**: O(N × T) where N = number of runs, T = time per test execution
+- **Space complexity**: O(N × S) where N = number of runs, S = size of stdout/stderr per run
+- **Resource limits**:
+  - Maximum runs: 1000 (configurable, prevents resource exhaustion)
+  - Maximum buffer per run: 10MB (stdout + stderr combined)
+  - No artificial timeout (waits for natural command completion)
+- **Execution**: Sequential, not parallel (avoids false flakiness from resource contention)
 
 ## Limitations
 
