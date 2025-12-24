@@ -37,18 +37,18 @@ test.after(() => {
 });
 
 test('integration - Node.js native test runner', async (t) => {
-  await t.test('should handle stable Node.js tests', () => {
+  await t.test('should handle stable Node.js tests', async () => {
     const testFile = join(FIXTURES_DIR, 'stable-node-test.js');
     writeFileSync(testFile, `
       import { test } from 'node:test';
       import assert from 'node:assert/strict';
 
-      test('stable test', () => {
+      test('stable test', async () => {
         assert.strictEqual(1 + 1, 2);
       });
     `);
 
-    const report = detectFlakiness({
+    const report = await await detectFlakiness({
       testCommand: `node --test ${testFile}`,
       runs: 5,
     });
@@ -61,7 +61,7 @@ test('integration - Node.js native test runner', async (t) => {
 });
 
 test('integration - Shell scripts with deterministic patterns', async (t) => {
-  await t.test('should detect flaky shell scripts with predetermined sequence', () => {
+  await t.test('should detect flaky shell scripts with predetermined sequence', async () => {
     const scriptFile = join(FIXTURES_DIR, 'flaky-script.sh');
     writeFileSync(scriptFile, `#!/bin/bash
 # Deterministic: Pass on even run numbers, fail on odd
@@ -92,14 +92,14 @@ fi
     assert.strictEqual(failedRuns, 5);
   });
 
-  await t.test('should handle stable shell scripts', () => {
+  await t.test('should handle stable shell scripts', async () => {
     const scriptFile = join(FIXTURES_DIR, 'stable-script.sh');
     writeFileSync(scriptFile, `#!/bin/bash
 echo "All tests passed"
 exit 0
 `, { mode: 0o755 });
 
-    const report = detectFlakiness({
+    const report = await await detectFlakiness({
       testCommand: `bash ${scriptFile}`,
       runs: 5,
     });
@@ -112,7 +112,7 @@ exit 0
 });
 
 test('integration - Environment-based testing', async (t) => {
-  await t.test('should detect environment variable dependency', () => {
+  await t.test('should detect environment variable dependency', async () => {
     const scriptFile = join(FIXTURES_DIR, 'env-test.sh');
     writeFileSync(scriptFile, `#!/bin/bash
 # Fails if FLAKY_ENV is not set
@@ -120,7 +120,7 @@ test('integration - Environment-based testing', async (t) => {
 `, { mode: 0o755 });
 
     // Run without env var (should all fail)
-    const report1 = detectFlakiness({
+    const report1 = await detectFlakiness({
       testCommand: `bash ${scriptFile}`,
       runs: 3,
     });
@@ -129,7 +129,7 @@ test('integration - Environment-based testing', async (t) => {
     assert.strictEqual(report1.flakyTests.length, 0); // All fail = not flaky
 
     // Run with env var (should all pass)
-    const report2 = detectFlakiness({
+    const report2 = await detectFlakiness({
       testCommand: `FLAKY_ENV=1 bash ${scriptFile}`,
       runs: 3,
     });
@@ -140,7 +140,7 @@ test('integration - Environment-based testing', async (t) => {
 });
 
 test('integration - File system operations', async (t) => {
-  await t.test('should handle tests with proper cleanup', () => {
+  await t.test('should handle tests with proper cleanup', async () => {
     const scriptFile = join(FIXTURES_DIR, 'file-cleanup.sh');
     const testDataFile = join(FIXTURES_DIR, 'test-data.txt');
 
@@ -167,7 +167,7 @@ fi
       // Ignore if doesn't exist
     }
 
-    const report = detectFlakiness({
+    const report = await await detectFlakiness({
       testCommand: `bash ${scriptFile}`,
       runs: 5,
     });
@@ -179,7 +179,7 @@ fi
 });
 
 test('integration - Large output handling', async (t) => {
-  await t.test('should handle tests with large stdout', () => {
+  await t.test('should handle tests with large stdout', async () => {
     const scriptFile = join(FIXTURES_DIR, 'large-output.sh');
     writeFileSync(scriptFile, `#!/bin/bash
 # Generate large output (1MB)
@@ -189,7 +189,7 @@ done
 exit 0
 `, { mode: 0o755 });
 
-    const report = detectFlakiness({
+    const report = await await detectFlakiness({
       testCommand: `bash ${scriptFile}`,
       runs: 2,
     });
@@ -201,7 +201,7 @@ exit 0
     assert(report.runs[0].stdout.length > 100000);
   });
 
-  await t.test('should handle tests with large stderr', () => {
+  await t.test('should handle tests with large stderr', async () => {
     const scriptFile = join(FIXTURES_DIR, 'large-stderr.sh');
     writeFileSync(scriptFile, `#!/bin/bash
 # Generate large stderr output
@@ -211,7 +211,7 @@ done
 exit 1
 `, { mode: 0o755 });
 
-    const report = detectFlakiness({
+    const report = await await detectFlakiness({
       testCommand: `bash ${scriptFile}`,
       runs: 2,
     });
@@ -225,7 +225,7 @@ exit 1
 });
 
 test('integration - Real-world test patterns', async (t) => {
-  await t.test('should handle test suite with setup/teardown', () => {
+  await t.test('should handle test suite with setup/teardown', async () => {
     const scriptFile = join(FIXTURES_DIR, 'suite-with-setup.sh');
     writeFileSync(scriptFile, `#!/bin/bash
 # Setup
@@ -247,7 +247,7 @@ rm -f $TEMP_FILE
 exit $RESULT
 `, { mode: 0o755 });
 
-    const report = detectFlakiness({
+    const report = await await detectFlakiness({
       testCommand: `bash ${scriptFile}`,
       runs: 5,
     });
@@ -259,7 +259,7 @@ exit $RESULT
 });
 
 test('integration - Complex multi-line output', async (t) => {
-  await t.test('should preserve multi-line test output', () => {
+  await t.test('should preserve multi-line test output', async () => {
     const scriptFile = join(FIXTURES_DIR, 'multiline-output.sh');
     writeFileSync(scriptFile, `#!/bin/bash
 cat <<EOF
@@ -275,7 +275,7 @@ EOF
 exit 0
 `, { mode: 0o755 });
 
-    const report = detectFlakiness({
+    const report = await await detectFlakiness({
       testCommand: `bash ${scriptFile}`,
       runs: 3,
     });
@@ -290,7 +290,7 @@ exit 0
 });
 
 test('fuzzing - Invariant testing with random inputs', async (t) => {
-  await t.test('should maintain invariants across varied run counts', () => {
+  await t.test('should maintain invariants across varied run counts', async () => {
     const scriptFile = join(FIXTURES_DIR, `always-pass-${Date.now()}.sh`);
     writeFileSync(scriptFile, `#!/bin/bash
 exit 0
@@ -300,7 +300,7 @@ exit 0
     const runCounts = [1, 2, 3, 5, 10, 20, 50, 100];
 
     for (const runs of runCounts) {
-      const report = detectFlakiness({
+      const report = await await detectFlakiness({
         testCommand: `bash ${scriptFile}`,
         runs,
         verbose: false,
@@ -332,7 +332,7 @@ exit 0
     }
   });
 
-  await t.test('should handle edge cases in output lengths', () => {
+  await t.test('should handle edge cases in output lengths', async () => {
     // Fuzz test with various output sizes
     const outputSizes = [0, 1, 10, 100, 1000, 10000, 100000];
 
@@ -344,7 +344,7 @@ head -c ${size} /dev/zero | tr '\\0' 'x'
 exit 0
 `, { mode: 0o755 });
 
-      const report = detectFlakiness({
+      const report = await await detectFlakiness({
         testCommand: `bash ${scriptFile}`,
         runs: 2,
       });
@@ -362,7 +362,7 @@ exit 0
     }
   });
 
-  await t.test('should maintain invariants for various exit codes', () => {
+  await t.test('should maintain invariants for various exit codes', async () => {
     // Fuzz test with different exit codes
     const exitCodes = [0, 1, 2, 42, 127, 255];
 
@@ -372,7 +372,7 @@ exit 0
 exit ${exitCode}
 `, { mode: 0o755 });
 
-      const report = detectFlakiness({
+      const report = await await detectFlakiness({
         testCommand: `bash ${scriptFile}`,
         runs: 3,
       });

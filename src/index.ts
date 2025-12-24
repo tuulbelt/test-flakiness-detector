@@ -2,9 +2,13 @@
  * Test Flakiness Detector
  *
  * Detect unreliable tests by running them multiple times and tracking failure rates.
+ *
+ * Dogfooding: Uses cli-progress-reporting for progress tracking (when available in monorepo).
  */
 
 import { spawnSync } from 'child_process';
+import { existsSync } from 'node:fs';
+import { join } from 'node:path';
 
 /**
  * Configuration options for flakiness detection
@@ -69,6 +73,25 @@ export interface FlakinessReport {
 }
 
 /**
+ * Try to load cli-progress-reporting (dogfooding - optional in monorepo)
+ * Returns null if not available (e.g., tool cloned independently)
+ */
+async function loadProgressReporting(): Promise<any | null> {
+  try {
+    // Try to import from sibling directory (monorepo context)
+    const progressPath = join(process.cwd(), '..', 'cli-progress-reporting', 'src', 'index.ts');
+    if (!existsSync(progressPath)) {
+      return null; // Not in monorepo, that's fine
+    }
+
+    const module = await import(`file://${progressPath}`);
+    return module;
+  } catch {
+    return null; // Import failed, that's fine - progress reporting is optional
+  }
+}
+
+/**
  * Run a test command once and capture the result
  *
  * @param command - The test command to execute
@@ -113,7 +136,7 @@ function runTestOnce(command: string, verbose: boolean): TestRunResult {
  *
  * @example
  * ```typescript
- * const report = detectFlakiness({
+ * const report = await detectFlakiness({
  *   testCommand: 'npm test',
  *   runs: 10,
  *   verbose: false
@@ -127,7 +150,7 @@ function runTestOnce(command: string, verbose: boolean): TestRunResult {
  * }
  * ```
  */
-export function detectFlakiness(config: Config): FlakinessReport {
+export async function detectFlakiness(config: Config): Promise<FlakinessReport> {
   const { testCommand, runs = 10, verbose = false } = config;
 
   if (!testCommand || typeof testCommand !== 'string') {
@@ -154,6 +177,18 @@ export function detectFlakiness(config: Config): FlakinessReport {
     };
   }
 
+  // Try to load progress reporting (dogfooding - optional)
+  const progress = await loadProgressReporting();
+  const progressId = `flakiness-${Date.now()}`;
+
+  if (progress && runs >= 5) {
+    // Only use progress reporting for 5+ runs (makes sense for longer operations)
+    const initResult = progress.init(runs, 'Detecting flakiness...', { id: progressId });
+    if (initResult.ok && verbose) {
+      console.error(`[INFO] Progress tracking enabled (dogfooding cli-progress-reporting)`);
+    }
+  }
+
   if (verbose) {
     console.error(`[INFO] Running test command ${runs} times: ${testCommand}`);
   }
@@ -176,6 +211,12 @@ export function detectFlakiness(config: Config): FlakinessReport {
     } else {
       failedRuns++;
     }
+
+    // Update progress after each run
+    if (progress && runs >= 5) {
+      const status = result.success ? 'passed' : 'failed';
+      progress.increment(1, `Run ${i + 1}/${runs} ${status} (${passedRuns} passed, ${failedRuns} failed)`, { id: progressId });
+    }
   }
 
   // Calculate flakiness: if some runs passed and some failed, the test is flaky
@@ -192,11 +233,24 @@ export function detectFlakiness(config: Config): FlakinessReport {
     });
   }
 
+  // Mark progress as complete
+  if (progress && runs >= 5) {
+    const summary = flakyTests.length > 0
+      ? `Flakiness detected: ${flakyTests[0].failureRate.toFixed(1)}% failure rate`
+      : 'No flakiness detected';
+    progress.finish(summary, { id: progressId });
+  }
+
   if (verbose) {
     console.error(`[INFO] Completed ${runs} runs: ${passedRuns} passed, ${failedRuns} failed`);
     if (flakyTests.length > 0) {
       console.error(`[WARN] Detected flaky tests!`);
     }
+  }
+
+  // Clean up progress file
+  if (progress && runs >= 5) {
+    progress.clear({ id: progressId });
   }
 
   return {
@@ -286,7 +340,7 @@ Exit Codes:
 }
 
 // CLI entry point - only runs when executed directly
-function main(): void {
+async function main(): Promise<void> {
   const args = globalThis.process?.argv?.slice(2) ?? [];
   const { config, showHelp } = parseArgs(args);
 
@@ -303,7 +357,7 @@ function main(): void {
     return;
   }
 
-  const report = detectFlakiness(config);
+  const report = await detectFlakiness(config);
 
   if (report.success) {
     // Output JSON report

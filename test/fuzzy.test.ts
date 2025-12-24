@@ -45,7 +45,7 @@ test.after(() => {
 });
 
 test('fuzzy - deterministic test command invariants', async (t) => {
-  await t.test('stable commands always report 100% pass or 100% fail', () => {
+  await t.test('stable commands always report 100% pass or 100% fail', async () => {
     const stableCommands = [
       'echo "test"',           // Always passes
       'exit 0',                // Always passes
@@ -56,7 +56,7 @@ test('fuzzy - deterministic test command invariants', async (t) => {
 
     for (const cmd of stableCommands) {
       const runs = randomInt(5, 20);
-      const report = detectFlakiness({ testCommand: cmd, runs });
+      const report = await await detectFlakiness({ testCommand: cmd, runs });
 
       assert.strictEqual(report.success, true);
       assert.strictEqual(report.totalRuns, runs);
@@ -70,10 +70,10 @@ test('fuzzy - deterministic test command invariants', async (t) => {
     }
   });
 
-  await t.test('run count is always respected', () => {
+  await t.test('run count is always respected', async () => {
     for (let i = 0; i < 20; i++) {
       const runs = randomInt(1, 50);
-      const report = detectFlakiness({
+      const report = await await detectFlakiness({
         testCommand: 'echo "test"',
         runs,
       });
@@ -84,7 +84,7 @@ test('fuzzy - deterministic test command invariants', async (t) => {
     }
   });
 
-  await t.test('totalRuns = passedRuns + failedRuns invariant', () => {
+  await t.test('totalRuns = passedRuns + failedRuns invariant', async () => {
     const commands = [
       'exit 0',
       'exit 1',
@@ -94,7 +94,7 @@ test('fuzzy - deterministic test command invariants', async (t) => {
 
     for (const cmd of commands) {
       const runs = randomInt(5, 20);
-      const report = detectFlakiness({ testCommand: cmd, runs });
+      const report = await await detectFlakiness({ testCommand: cmd, runs });
 
       assert.strictEqual(
         report.totalRuns,
@@ -106,7 +106,7 @@ test('fuzzy - deterministic test command invariants', async (t) => {
 });
 
 test('fuzzy - probabilistic test invariants', async (t) => {
-  await t.test('simulated flaky tests with known failure rates', () => {
+  await t.test('simulated flaky tests with known failure rates', async () => {
     for (let i = 0; i < 10; i++) {
       const failureRate = randomFailureRate();
       const runs = 20; // Fixed for predictable stats
@@ -129,7 +129,7 @@ else
 fi
 `, { mode: 0o755 });
 
-      const report = detectFlakiness({
+      const report = await await detectFlakiness({
         testCommand: `bash ${scriptPath}`,
         runs,
       });
@@ -151,13 +151,13 @@ fi
     }
   });
 
-  await t.test('multiple executions with same parameters produce consistent results', () => {
+  await t.test('multiple executions with same parameters produce consistent results', async () => {
     const cmd = 'echo "stable test"';
     const runs = 10;
 
-    const report1 = detectFlakiness({ testCommand: cmd, runs });
-    const report2 = detectFlakiness({ testCommand: cmd, runs });
-    const report3 = detectFlakiness({ testCommand: cmd, runs });
+    const report1 = await detectFlakiness({ testCommand: cmd, runs });
+    const report2 = await detectFlakiness({ testCommand: cmd, runs });
+    const report3 = await detectFlakiness({ testCommand: cmd, runs });
 
     // All should produce identical results for deterministic command
     assert.strictEqual(report1.passedRuns, report2.passedRuns);
@@ -168,7 +168,7 @@ fi
 });
 
 test('fuzzy - output capture invariants', async (t) => {
-  await t.test('stdout and stderr are always captured', () => {
+  await t.test('stdout and stderr are always captured', async () => {
     const testCases = [
       { cmd: 'echo "hello"', expectStdout: 'hello' },
       { cmd: 'echo "world"', expectStdout: 'world' },
@@ -177,7 +177,7 @@ test('fuzzy - output capture invariants', async (t) => {
     ];
 
     for (const tc of testCases) {
-      const report = detectFlakiness({ testCommand: tc.cmd, runs: 3 });
+      const report = await await detectFlakiness({ testCommand: tc.cmd, runs: 3 });
 
       assert.strictEqual(report.success, true);
 
@@ -194,8 +194,8 @@ test('fuzzy - output capture invariants', async (t) => {
     }
   });
 
-  await t.test('output is consistent for deterministic commands', () => {
-    const report = detectFlakiness({
+  await t.test('output is consistent for deterministic commands', async () => {
+    const report = await await detectFlakiness({
       testCommand: 'echo "consistent output"',
       runs: 10,
     });
@@ -210,8 +210,8 @@ test('fuzzy - output capture invariants', async (t) => {
 });
 
 test('fuzzy - exit code handling invariants', async (t) => {
-  await t.test('exit code 0 always means success', () => {
-    const report = detectFlakiness({
+  await t.test('exit code 0 always means success', async () => {
+    const report = await await detectFlakiness({
       testCommand: 'exit 0',
       runs: randomInt(5, 15),
     });
@@ -227,11 +227,11 @@ test('fuzzy - exit code handling invariants', async (t) => {
       'All runs with exit 0 should pass');
   });
 
-  await t.test('non-zero exit codes mean failure', () => {
+  await t.test('non-zero exit codes mean failure', async () => {
     const exitCodes = [1, 2, 127, 255];
 
     for (const code of exitCodes) {
-      const report = detectFlakiness({
+      const report = await await detectFlakiness({
         testCommand: `exit ${code}`,
         runs: randomInt(3, 10),
       });
@@ -250,13 +250,13 @@ test('fuzzy - exit code handling invariants', async (t) => {
 });
 
 test('fuzzy - error handling invariants', async (t) => {
-  await t.test('invalid test commands are handled', () => {
+  await t.test('invalid test commands are handled', async () => {
     const invalidCommands = [
       'nonexistent-command-12345',    // Command not found
     ];
 
     for (const cmd of invalidCommands) {
-      const report = detectFlakiness({
+      const report = await await detectFlakiness({
         testCommand: cmd,
         runs: randomInt(1, 5),
       });
@@ -268,11 +268,11 @@ test('fuzzy - error handling invariants', async (t) => {
     }
   });
 
-  await t.test('runs parameter must be positive', () => {
+  await t.test('runs parameter must be positive', async () => {
     const validRuns = [1, 5, 10, 100, 1000];
 
     for (const runs of validRuns) {
-      const report = detectFlakiness({
+      const report = await await detectFlakiness({
         testCommand: 'echo "test"',
         runs,
       });
@@ -282,12 +282,12 @@ test('fuzzy - error handling invariants', async (t) => {
     }
   });
 
-  await t.test('all reports complete successfully', () => {
+  await t.test('all reports complete successfully', async () => {
     // Even edge case commands should complete without throwing
     const commands = ['echo "test"', 'exit 0', 'exit 1'];
 
     for (const cmd of commands) {
-      const report = detectFlakiness({
+      const report = await await detectFlakiness({
         testCommand: cmd,
         runs: 3,
       });
@@ -302,16 +302,16 @@ test('fuzzy - error handling invariants', async (t) => {
 });
 
 test('fuzzy - performance invariants', async (t) => {
-  await t.test('execution time scales linearly with runs', () => {
+  await t.test('execution time scales linearly with runs', async () => {
     const baseRuns = 5;
     const doubledRuns = 10;
 
     const start1 = performance.now();
-    detectFlakiness({ testCommand: 'echo "test"', runs: baseRuns });
+    await detectFlakiness({ testCommand: 'echo "test"', runs: baseRuns });
     const time1 = performance.now() - start1;
 
     const start2 = performance.now();
-    detectFlakiness({ testCommand: 'echo "test"', runs: doubledRuns });
+    await detectFlakiness({ testCommand: 'echo "test"', runs: doubledRuns });
     const time2 = performance.now() - start2;
 
     // Doubled runs should take roughly 2x time (with some tolerance)
@@ -320,11 +320,11 @@ test('fuzzy - performance invariants', async (t) => {
       `Time should scale roughly linearly: ${ratio.toFixed(2)}x`);
   });
 
-  await t.test('short commands complete quickly', () => {
+  await t.test('short commands complete quickly', async () => {
     const runs = 10;
 
     const start = performance.now();
-    const report = detectFlakiness({
+    const report = await await detectFlakiness({
       testCommand: 'echo "fast"',
       runs,
     });
@@ -337,12 +337,12 @@ test('fuzzy - performance invariants', async (t) => {
 });
 
 test('fuzzy - verbose mode invariants', async (t) => {
-  await t.test('verbose mode does not affect results', () => {
+  await t.test('verbose mode does not affect results', async () => {
     const cmd = 'echo "test"';
     const runs = randomInt(5, 10);
 
-    const normalReport = detectFlakiness({ testCommand: cmd, runs, verbose: false });
-    const verboseReport = detectFlakiness({ testCommand: cmd, runs, verbose: true });
+    const normalReport = await detectFlakiness({ testCommand: cmd, runs, verbose: false });
+    const verboseReport = await detectFlakiness({ testCommand: cmd, runs, verbose: true });
 
     // Results should be identical regardless of verbose mode
     assert.strictEqual(normalReport.totalRuns, verboseReport.totalRuns);
@@ -353,7 +353,7 @@ test('fuzzy - verbose mode invariants', async (t) => {
 });
 
 test('fuzzy - flaky test detection invariants', async (t) => {
-  await t.test('test with mixed results is marked as flaky', () => {
+  await t.test('test with mixed results is marked as flaky', async () => {
     // Create a test that fails every other run
     const counterFile = join(FIXTURES_DIR, `flaky-counter-${Date.now()}.txt`);
     writeFileSync(counterFile, '0');
@@ -371,7 +371,7 @@ else
 fi
 `, { mode: 0o755 });
 
-    const report = detectFlakiness({
+    const report = await await detectFlakiness({
       testCommand: `bash ${scriptPath}`,
       runs: 10,
     });

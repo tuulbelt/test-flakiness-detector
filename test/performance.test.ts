@@ -11,10 +11,10 @@ import { join } from 'node:path';
 import { detectFlakiness } from '../src/index.js';
 
 test('performance - execution speed', async (t) => {
-  await t.test('should complete 10 runs in under 2 seconds', () => {
+  await t.test('should complete 10 runs in under 2 seconds', async () => {
     const start = performance.now();
 
-    const report = detectFlakiness({
+    const report = await await detectFlakiness({
       testCommand: 'echo "test"',
       runs: 10,
     });
@@ -26,10 +26,10 @@ test('performance - execution speed', async (t) => {
     assert(elapsed < 2000, `Took ${elapsed}ms, should be < 2000ms`);
   });
 
-  await t.test('should complete 100 runs in under 15 seconds', () => {
+  await t.test('should complete 100 runs in under 15 seconds', async () => {
     const start = performance.now();
 
-    const report = detectFlakiness({
+    const report = await await detectFlakiness({
       testCommand: 'echo "test"',
       runs: 100,
     });
@@ -41,10 +41,10 @@ test('performance - execution speed', async (t) => {
     assert(elapsed < 15000, `Took ${elapsed}ms, should be < 15000ms`);
   });
 
-  await t.test('should handle maximum 1000 runs', () => {
+  await t.test('should handle maximum 1000 runs', async () => {
     const start = performance.now();
 
-    const report = detectFlakiness({
+    const report = await await detectFlakiness({
       testCommand: 'echo "test"',
       runs: 1000,
     });
@@ -60,7 +60,7 @@ test('performance - execution speed', async (t) => {
 });
 
 test('performance - memory usage', async (t) => {
-  await t.test('should not leak memory with many runs', () => {
+  await t.test('should not leak memory with many runs', async () => {
     // Force garbage collection if available
     if (global.gc) {
       global.gc();
@@ -70,7 +70,7 @@ test('performance - memory usage', async (t) => {
 
     // Run detection multiple times
     for (let i = 0; i < 10; i++) {
-      detectFlakiness({
+      await detectFlakiness({
         testCommand: 'echo "test"',
         runs: 100,
       });
@@ -91,10 +91,10 @@ test('performance - memory usage', async (t) => {
     );
   });
 
-  await t.test('should handle large output without excessive memory', () => {
+  await t.test('should handle large output without excessive memory', async () => {
     const initialMemory = process.memoryUsage().heapUsed;
 
-    const report = detectFlakiness({
+    const report = await await detectFlakiness({
       testCommand: `node -e "for(let i=0; i<10000; i++) console.log('test line' + i)"`,
       runs: 10,
     });
@@ -114,14 +114,14 @@ test('performance - memory usage', async (t) => {
 });
 
 test('performance - scalability', async (t) => {
-  await t.test('should scale linearly with number of runs', () => {
+  await t.test('should scale linearly with number of runs', async () => {
     const times: number[] = [];
     const runCounts = [10, 20, 40, 80];
 
     for (const runs of runCounts) {
       const start = performance.now();
 
-      detectFlakiness({
+      await detectFlakiness({
         testCommand: 'echo "test"',
         runs,
       });
@@ -142,10 +142,10 @@ test('performance - scalability', async (t) => {
     assert(ratio40to80 > 1.5 && ratio40to80 < 3, `Ratio 40->80 runs: ${ratio40to80.toFixed(2)}`);
   });
 
-  await t.test('should handle fast-failing tests efficiently', () => {
+  await t.test('should handle fast-failing tests efficiently', async () => {
     const start = performance.now();
 
-    const report = detectFlakiness({
+    const report = await await detectFlakiness({
       testCommand: 'exit 1',
       runs: 100,
     });
@@ -160,8 +160,8 @@ test('performance - scalability', async (t) => {
 });
 
 test('performance - resource limits', async (t) => {
-  await t.test('should respect maximum runs limit', () => {
-    const report = detectFlakiness({
+  await t.test('should respect maximum runs limit', async () => {
+    const report = await await detectFlakiness({
       testCommand: 'echo "test"',
       runs: 1000, // Maximum allowed
     });
@@ -170,9 +170,9 @@ test('performance - resource limits', async (t) => {
     assert.strictEqual(report.totalRuns, 1000);
   });
 
-  await t.test('should handle maximum buffer size (10MB)', () => {
+  await t.test('should handle maximum buffer size (10MB)', async () => {
     // Generate ~5MB of output per run
-    const report = detectFlakiness({
+    const report = await await detectFlakiness({
       testCommand: `node -e "console.log('x'.repeat(5 * 1024 * 1024))"`,
       runs: 2,
     });
@@ -187,14 +187,14 @@ test('performance - resource limits', async (t) => {
 });
 
 test('performance - concurrent-like behavior', async (t) => {
-  await t.test('should maintain consistent performance across runs', () => {
+  await t.test('should maintain consistent performance across runs', async () => {
     const timings: number[] = [];
 
     // Run detection 5 times and measure consistency
     for (let i = 0; i < 5; i++) {
       const start = performance.now();
 
-      detectFlakiness({
+      await detectFlakiness({
         testCommand: 'echo "test"',
         runs: 20,
       });
@@ -218,11 +218,11 @@ test('performance - concurrent-like behavior', async (t) => {
 });
 
 test('performance - report generation', async (t) => {
-  await t.test('should generate reports quickly even with many runs', () => {
+  await t.test('should generate reports quickly even with many runs', async () => {
     const start = performance.now();
 
     // Use a simple deterministic test (all pass)
-    const report = detectFlakiness({
+    const report = await await detectFlakiness({
       testCommand: 'exit 0',
       runs: 100,
     });
@@ -240,7 +240,7 @@ test('performance - report generation', async (t) => {
     assert(elapsed < 30000, `Took ${elapsed}ms, should be < 30000ms`);
   });
 
-  await t.test('should calculate failure rates accurately', () => {
+  await t.test('should calculate failure rates accurately', async () => {
     // Create deterministic flaky test (50% failure rate)
     const tmpDir = join(process.cwd(), 'test', 'tmp');
     mkdirSync(tmpDir, { recursive: true });
@@ -257,7 +257,7 @@ echo $((COUNT + 1)) > "${counterFile}"
 exit $(( COUNT % 2 ))
 `, { mode: 0o755 });
 
-    const report = detectFlakiness({
+    const report = await await detectFlakiness({
       testCommand: `bash ${testScript}`,
       runs: 100,
     });
@@ -283,10 +283,10 @@ exit $(( COUNT % 2 ))
 });
 
 test('performance - edge case performance', async (t) => {
-  await t.test('should handle minimum runs (1) instantly', () => {
+  await t.test('should handle minimum runs (1) instantly', async () => {
     const start = performance.now();
 
-    const report = detectFlakiness({
+    const report = await await detectFlakiness({
       testCommand: 'echo "test"',
       runs: 1,
     });
@@ -297,10 +297,10 @@ test('performance - edge case performance', async (t) => {
     assert(elapsed < 500, `Took ${elapsed}ms, should be < 500ms for single run`);
   });
 
-  await t.test('should handle empty command output efficiently', () => {
+  await t.test('should handle empty command output efficiently', async () => {
     const start = performance.now();
 
-    const report = detectFlakiness({
+    const report = await await detectFlakiness({
       testCommand: 'true', // No output
       runs: 50,
     });
@@ -311,10 +311,10 @@ test('performance - edge case performance', async (t) => {
     assert(elapsed < 5000, `Took ${elapsed}ms, should be < 5000ms`);
   });
 
-  await t.test('should handle commands with minimal output', () => {
+  await t.test('should handle commands with minimal output', async () => {
     const start = performance.now();
 
-    const report = detectFlakiness({
+    const report = await await detectFlakiness({
       testCommand: 'echo "x"',
       runs: 100,
     });
@@ -328,7 +328,7 @@ test('performance - edge case performance', async (t) => {
   });
 });
 
-test('performance - benchmarks summary', () => {
+test('performance - benchmarks summary', async () => {
   // This test documents expected performance characteristics
   const benchmarks = {
     runs10: { maxTime: 2000, description: '10 runs should complete in <2s' },
