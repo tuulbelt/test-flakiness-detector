@@ -368,14 +368,14 @@ Potential improvements for future versions:
 
 See [SPEC.md](SPEC.md) for detailed technical specification.
 
+
 ## Demo
 
-See the tool in action:
+![Demo](docs/demo.gif)
 
-- **Interactive Demo**: [View on asciinema.org](#) (Coming soon)
-- **Try it Online**: [![Open in StackBlitz](https://developer.stackblitz.com/img/open_in_stackblitz.svg)](https://stackblitz.com/github/tuulbelt/tuulbelt/tree/main/test-flakiness-detector)
+**[▶ View interactive recording on asciinema.org](https://asciinema.org/a/XQyP5OkUAFz3qTUWsK5UqRvLg)**
 
-> Demos are automatically generated via GitHub Actions. See [`.github/workflows/create-demos.yml`](../.github/workflows/create-demos.yml) for automation details.
+> Try it online: [![Open in StackBlitz](https://developer.stackblitz.com/img/open_in_stackblitz.svg)](https://stackblitz.com/github/tuulbelt/tuulbelt/tree/main/test-flakiness-detector)
 
 ## License
 
