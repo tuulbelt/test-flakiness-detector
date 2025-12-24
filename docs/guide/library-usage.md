@@ -11,7 +11,7 @@ import { detectFlakiness } from './src/index.js';
 ## Simple Usage
 
 ```typescript
-const report = detectFlakiness({
+const report = await detectFlakiness({
   testCommand: 'npm test',
   runs: 20
 });
@@ -26,7 +26,7 @@ console.log(`Flaky tests: ${report.flakyTests.length}`);
 import { detectFlakiness } from './src/index.js';
 
 async function checkForFlakiness() {
-  const report = detectFlakiness({
+  const report = await detectFlakiness({
     testCommand: 'npm run test:integration',
     runs: 50,
     verbose: false
@@ -85,7 +85,7 @@ report.flakyTests.forEach((test: TestFlakiness) => {
   run: |
     node -e "
       const { detectFlakiness } = require('./dist/index.js');
-      const report = detectFlakiness({ testCommand: 'npm test', runs: 20 });
+      const report = await detectFlakiness({ testCommand: 'npm test', runs: 20 });
       if (report.flakyTests.length > 0) {
         console.error('Flaky tests found!');
         process.exit(1);
@@ -110,7 +110,7 @@ Where `check-flakiness.js`:
 import { detectFlakiness } from './dist/index.js';
 import { writeFileSync } from 'fs';
 
-const report = detectFlakiness({
+const report = await detectFlakiness({
   testCommand: 'npm test',
   runs: 20
 });
@@ -136,7 +136,7 @@ const suites = [
 suites.forEach(suite => {
   console.log(`Checking ${suite.name} tests...`);
 
-  const report = detectFlakiness({
+  const report = await detectFlakiness({
     testCommand: suite.command,
     runs: 10
   });
@@ -150,7 +150,7 @@ suites.forEach(suite => {
 ### Custom Thresholds
 
 ```typescript
-const report = detectFlakiness({
+const report = await detectFlakiness({
   testCommand: 'npm test',
   runs: 100
 });
@@ -169,7 +169,7 @@ if (significantlyFlaky.length > 0) {
 ### Detailed Reporting
 
 ```typescript
-const report = detectFlakiness({
+const report = await detectFlakiness({
   testCommand: 'npm test',
   runs: 20,
   verbose: true
@@ -194,7 +194,7 @@ console.log(JSON.stringify(summary, null, 2));
 
 ```typescript
 try {
-  const report = detectFlakiness({
+  const report = await detectFlakiness({
     testCommand: 'invalid-command',
     runs: 10
   });

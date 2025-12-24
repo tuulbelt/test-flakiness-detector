@@ -74,7 +74,7 @@ When tests fail intermittently:
 ```typescript
 import { detectFlakiness } from '@tuulbelt/test-flakiness-detector';
 
-const report = detectFlakiness({
+const report = await detectFlakiness({
   testCommand: 'npm test',
   runs: 10
 });

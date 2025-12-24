@@ -62,7 +62,7 @@ npx tsx src/index.ts --help
 ```typescript
 import { detectFlakiness } from './src/index.js';
 
-const report = detectFlakiness({
+const report = await detectFlakiness({
   testCommand: 'npm test',
   runs: 10,
   verbose: false
@@ -353,7 +353,7 @@ The test suite includes:
 - Flaky test detection tests
 - Edge case handling tests
 - Error scenario tests
-- Property-based fuzzy tests (24 tests)
+- Property-based fuzzy tests
 
 ### Dogfooding: Tool Composition
 

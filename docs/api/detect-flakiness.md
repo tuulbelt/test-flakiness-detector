@@ -5,7 +5,7 @@ The main function for detecting flaky tests.
 ## Signature
 
 ```typescript
-function detectFlakiness(options: FlakinessOptions): FlakinessReport
+async function detectFlakiness(options: FlakinessOptions): Promise<FlakinessReport>
 ```
 
 ## Parameters
@@ -45,7 +45,7 @@ See [Types](/api/types) for complete type definitions.
 ```typescript
 import { detectFlakiness } from '@tuulbelt/test-flakiness-detector';
 
-const report = detectFlakiness({
+const report = await detectFlakiness({
   testCommand: 'npm test',
   runs: 20
 });
@@ -58,7 +58,7 @@ console.log(`Found ${report.flakyTests.length} flaky test(s)`);
 ### Minimal Example
 
 ```typescript
-const report = detectFlakiness({
+const report = await detectFlakiness({
   testCommand: 'npm test'
 });
 // Uses default: 10 runs, verbose: false
@@ -67,7 +67,7 @@ const report = detectFlakiness({
 ### With All Options
 
 ```typescript
-const report = detectFlakiness({
+const report = await detectFlakiness({
   testCommand: 'npm run test:integration',
   runs: 50,
   verbose: true
@@ -78,7 +78,7 @@ const report = detectFlakiness({
 
 **Jest:**
 ```typescript
-detectFlakiness({
+await detectFlakiness({
   testCommand: 'jest tests/',
   runs: 20
 });
@@ -86,7 +86,7 @@ detectFlakiness({
 
 **Pytest:**
 ```typescript
-detectFlakiness({
+await detectFlakiness({
   testCommand: 'pytest tests/ -v',
   runs: 30
 });
@@ -94,7 +94,7 @@ detectFlakiness({
 
 **Cargo:**
 ```typescript
-detectFlakiness({
+await detectFlakiness({
   testCommand: 'cargo test',
   runs: 15
 });
@@ -102,7 +102,7 @@ detectFlakiness({
 
 **Go:**
 ```typescript
-detectFlakiness({
+await detectFlakiness({
   testCommand: 'go test ./...',
   runs: 25
 });
@@ -113,7 +113,7 @@ detectFlakiness({
 ### Check for Any Flakiness
 
 ```typescript
-const report = detectFlakiness({
+const report = await detectFlakiness({
   testCommand: 'npm test',
   runs: 20
 });
@@ -127,7 +127,7 @@ if (report.flakyTests.length > 0) {
 ### Get Failure Rates
 
 ```typescript
-const report = detectFlakiness({
+const report = await detectFlakiness({
   testCommand: 'npm test',
   runs: 50
 });
@@ -140,7 +140,7 @@ report.flakyTests.forEach(test => {
 ### Filter by Severity
 
 ```typescript
-const report = detectFlakiness({
+const report = await detectFlakiness({
   testCommand: 'npm test',
   runs: 100
 });
@@ -157,7 +157,7 @@ const minor = report.flakyTests.filter(t => t.failureRate < 5);
 ### Check Success Status
 
 ```typescript
-const report = detectFlakiness({
+const report = await detectFlakiness({
   testCommand: 'invalid-command',
   runs: 10
 });
@@ -172,7 +172,7 @@ if (!report.success) {
 
 ```typescript
 try {
-  const report = detectFlakiness({
+  const report = await detectFlakiness({
     testCommand: 'npm test',
     runs: 20
   });
@@ -189,7 +189,7 @@ try {
 
 ```typescript
 function checkFlakiness(threshold: number = 5) {
-  const report = detectFlakiness({
+  const report = await detectFlakiness({
     testCommand: 'npm test',
     runs: 100
   });
@@ -238,7 +238,7 @@ results.forEach(({ suite, report }) => {
 ```typescript
 import { writeFileSync } from 'fs';
 
-const report = detectFlakiness({
+const report = await detectFlakiness({
   testCommand: 'npm test',
   runs: 50
 });
@@ -269,7 +269,7 @@ Each run stores stdout/stderr in memory. For tests with large output:
 
 ```typescript
 // Redirect output to reduce memory
-detectFlakiness({
+await detectFlakiness({
   testCommand: 'npm test 2>/dev/null',
   runs: 100
 });

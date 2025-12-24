@@ -7,7 +7,7 @@ Main function for detecting test flakiness.
 ### Signature
 
 ```typescript
-function detectFlakiness(config: Config): FlakinessReport
+async function detectFlakiness(config: Config): Promise<FlakinessReport>
 ```
 
 ### Parameters
@@ -37,7 +37,7 @@ function detectFlakiness(config: Config): FlakinessReport
 ```typescript
 import { detectFlakiness } from './src/index.js';
 
-const report = detectFlakiness({
+const report = await detectFlakiness({
   testCommand: 'npm test',
   runs: 20,
   verbose: true

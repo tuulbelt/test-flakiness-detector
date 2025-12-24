@@ -53,7 +53,7 @@ const options: FlakinessOptions = {
   verbose: false            // Optional, default: false
 };
 
-const report = detectFlakiness(options);
+const report = await detectFlakiness(options);
 ```
 
 ## Environment Variables
