@@ -14,7 +14,7 @@ test('stress - extreme inputs', async (t) => {
   await t.test('should handle very long command strings', async () => {
     const longCommand = 'echo ' + '"x"'.repeat(100) + ' | grep x';
 
-    const report = await await detectFlakiness({
+    const report = await detectFlakiness({
       testCommand: longCommand,
       runs: 3,
     });
@@ -37,7 +37,7 @@ test('stress - extreme inputs', async (t) => {
     ];
 
     for (const cmd of commands) {
-      const report = await await detectFlakiness({
+      const report = await detectFlakiness({
         testCommand: cmd,
         runs: 2,
       });
@@ -47,7 +47,7 @@ test('stress - extreme inputs', async (t) => {
   });
 
   await t.test('should handle unicode in commands', async () => {
-    const report = await await detectFlakiness({
+    const report = await detectFlakiness({
       testCommand: 'echo "测试 тест テスト 🎉"',
       runs: 3,
     });
@@ -59,7 +59,7 @@ test('stress - extreme inputs', async (t) => {
 
 test('stress - boundary conditions', async (t) => {
   await t.test('should handle exactly 1 run', async () => {
-    const report = await await detectFlakiness({
+    const report = await detectFlakiness({
       testCommand: 'echo "test"',
       runs: 1,
     });
@@ -70,7 +70,7 @@ test('stress - boundary conditions', async (t) => {
   });
 
   await t.test('should handle exactly 1000 runs (maximum)', async () => {
-    const report = await await detectFlakiness({
+    const report = await detectFlakiness({
       testCommand: 'true',
       runs: 1000,
     });
@@ -81,7 +81,7 @@ test('stress - boundary conditions', async (t) => {
   });
 
   await t.test('should reject 0 runs', async () => {
-    const report = await await detectFlakiness({
+    const report = await detectFlakiness({
       testCommand: 'echo "test"',
       runs: 0,
     });
@@ -91,7 +91,7 @@ test('stress - boundary conditions', async (t) => {
   });
 
   await t.test('should reject 1001 runs', async () => {
-    const report = await await detectFlakiness({
+    const report = await detectFlakiness({
       testCommand: 'echo "test"',
       runs: 1001,
     });
@@ -101,7 +101,7 @@ test('stress - boundary conditions', async (t) => {
   });
 
   await t.test('should reject negative runs', async () => {
-    const report = await await detectFlakiness({
+    const report = await detectFlakiness({
       testCommand: 'echo "test"',
       runs: -5,
     });
@@ -112,7 +112,7 @@ test('stress - boundary conditions', async (t) => {
 
 test('stress - malformed inputs', async (t) => {
   await t.test('should handle fractional runs', async () => {
-    const report = await await detectFlakiness({
+    const report = await detectFlakiness({
       testCommand: 'echo "test"',
       runs: 5.7, // Should be treated as 5 (parseInt behavior)
     });
@@ -121,7 +121,7 @@ test('stress - malformed inputs', async (t) => {
   });
 
   await t.test('should reject NaN runs', async () => {
-    const report = await await detectFlakiness({
+    const report = await detectFlakiness({
       testCommand: 'echo "test"',
       runs: NaN,
     });
@@ -130,7 +130,7 @@ test('stress - malformed inputs', async (t) => {
   });
 
   await t.test('should reject Infinity runs', async () => {
-    const report = await await detectFlakiness({
+    const report = await detectFlakiness({
       testCommand: 'echo "test"',
       runs: Infinity,
     });
@@ -139,7 +139,7 @@ test('stress - malformed inputs', async (t) => {
   });
 
   await t.test('should handle null command', async () => {
-    const report = await await detectFlakiness({
+    const report = await detectFlakiness({
       testCommand: null as unknown as string,
       runs: 5,
     });
@@ -149,7 +149,7 @@ test('stress - malformed inputs', async (t) => {
   });
 
   await t.test('should handle undefined command', async () => {
-    const report = await await detectFlakiness({
+    const report = await detectFlakiness({
       testCommand: undefined as unknown as string,
       runs: 5,
     });
@@ -158,7 +158,7 @@ test('stress - malformed inputs', async (t) => {
   });
 
   await t.test('should handle whitespace-only command', async () => {
-    const report = await await detectFlakiness({
+    const report = await detectFlakiness({
       testCommand: '   ',
       runs: 2,
     });
@@ -170,7 +170,7 @@ test('stress - malformed inputs', async (t) => {
 
 test('stress - command failure modes', async (t) => {
   await t.test('should handle commands that do not exist', async () => {
-    const report = await await detectFlakiness({
+    const report = await detectFlakiness({
       testCommand: 'nonexistent-command-xyz-12345',
       runs: 3,
     });
@@ -181,7 +181,7 @@ test('stress - command failure modes', async (t) => {
   });
 
   await t.test('should handle commands with syntax errors', async () => {
-    const report = await await detectFlakiness({
+    const report = await detectFlakiness({
       testCommand: 'echo "unclosed quote',
       runs: 2,
     });
@@ -192,7 +192,7 @@ test('stress - command failure modes', async (t) => {
 
   await t.test('should handle commands that segfault', async () => {
     // This might not actually segfault in all environments, but tests the concept
-    const report = await await detectFlakiness({
+    const report = await detectFlakiness({
       testCommand: 'sh -c "kill -11 $$"', // Send SIGSEGV to self
       runs: 2,
     });
@@ -203,7 +203,7 @@ test('stress - command failure modes', async (t) => {
 
   await t.test('should handle commands with various exit codes', async () => {
     for (const exitCode of [1, 2, 42, 127, 255]) {
-      const report = await await detectFlakiness({
+      const report = await detectFlakiness({
         testCommand: `exit ${exitCode}`,
         runs: 2,
       });
@@ -242,7 +242,7 @@ test('stress - fuzzing', async (t) => {
     ];
 
     for (const randomCmd of randomStrings) {
-      const report = await await detectFlakiness({
+      const report = await detectFlakiness({
         testCommand: randomCmd || 'true', // Use 'true' for empty string
         runs: 1,
       });
@@ -271,7 +271,7 @@ test('stress - fuzzing', async (t) => {
     ];
 
     for (const runs of randomRuns) {
-      const report = await await detectFlakiness({
+      const report = await detectFlakiness({
         testCommand: 'true',
         runs,
       });
@@ -289,7 +289,7 @@ test('stress - fuzzing', async (t) => {
       const cmd = commands[Math.floor(Math.random() * commands.length)];
       const runs = runsCounts[Math.floor(Math.random() * runsCounts.length)];
 
-      const report = await await detectFlakiness({
+      const report = await detectFlakiness({
         testCommand: cmd || 'true',
         runs,
       });
@@ -306,7 +306,7 @@ test('stress - concurrent-like scenarios', async (t) => {
     const reports = [];
 
     for (let i = 0; i < 10; i++) {
-      const report = await await detectFlakiness({
+      const report = await detectFlakiness({
         testCommand: 'echo "test"',
         runs: 5,
       });
@@ -341,7 +341,7 @@ test('stress - concurrent-like scenarios', async (t) => {
 
 test('stress - output edge cases', async (t) => {
   await t.test('should handle binary output', async () => {
-    const report = await await detectFlakiness({
+    const report = await detectFlakiness({
       testCommand: 'echo -e "\\x00\\x01\\x02\\xFF"',
       runs: 2,
     });
@@ -352,7 +352,7 @@ test('stress - output edge cases', async (t) => {
 
   await t.test('should handle extremely long single line', async () => {
     // Generate a very long single line (1MB)
-    const report = await await detectFlakiness({
+    const report = await detectFlakiness({
       testCommand: `node -e "process.stdout.write('x'.repeat(1024 * 1024))"`,
       runs: 2,
     });
@@ -363,7 +363,7 @@ test('stress - output edge cases', async (t) => {
   });
 
   await t.test('should handle many small lines', async () => {
-    const report = await await detectFlakiness({
+    const report = await detectFlakiness({
       testCommand: 'node -e "for(let i=0; i<100000; i++) console.log(i)"',
       runs: 2,
     });
@@ -374,7 +374,7 @@ test('stress - output edge cases', async (t) => {
   });
 
   await t.test('should handle no output at all', async () => {
-    const report = await await detectFlakiness({
+    const report = await detectFlakiness({
       testCommand: 'true',
       runs: 3,
     });
@@ -386,7 +386,7 @@ test('stress - output edge cases', async (t) => {
   });
 
   await t.test('should handle only stderr output', async () => {
-    const report = await await detectFlakiness({
+    const report = await detectFlakiness({
       testCommand: `node -e "console.error('error message')"`,
       runs: 2,
     });
@@ -397,7 +397,7 @@ test('stress - output edge cases', async (t) => {
   });
 
   await t.test('should handle mixed stdout and stderr', async () => {
-    const report = await await detectFlakiness({
+    const report = await detectFlakiness({
       testCommand: `node -e "console.log('out'); console.error('err')"`,
       runs: 2,
     });
@@ -411,7 +411,7 @@ test('stress - output edge cases', async (t) => {
 
 test('stress - statistical edge cases', async (t) => {
   await t.test('should handle all-pass scenario', async () => {
-    const report = await await detectFlakiness({
+    const report = await detectFlakiness({
       testCommand: 'true',
       runs: 50,
     });
@@ -422,7 +422,7 @@ test('stress - statistical edge cases', async (t) => {
   });
 
   await t.test('should handle all-fail scenario', async () => {
-    const report = await await detectFlakiness({
+    const report = await detectFlakiness({
       testCommand: 'false',
       runs: 50,
     });
@@ -453,7 +453,7 @@ else
 fi
 `, { mode: 0o755 });
 
-    const report = await await detectFlakiness({
+    const report = await detectFlakiness({
       testCommand: `bash ${testScript}`,
       runs: 100,
     });
@@ -492,7 +492,7 @@ else
 fi
 `, { mode: 0o755 });
 
-    const report = await await detectFlakiness({
+    const report = await detectFlakiness({
       testCommand: `bash ${testScript}`,
       runs: 100,
     });
@@ -513,7 +513,7 @@ fi
 
 test('stress - resource exhaustion prevention', async (t) => {
   await t.test('should not allow runs > 1000', async () => {
-    const report = await await detectFlakiness({
+    const report = await detectFlakiness({
       testCommand: 'true',
       runs: 10000,
     });
@@ -524,7 +524,7 @@ test('stress - resource exhaustion prevention', async (t) => {
 
   await t.test('should handle buffer limit gracefully', async () => {
     // Try to generate more than 10MB (should be truncated by execSync)
-    const report = await await detectFlakiness({
+    const report = await detectFlakiness({
       testCommand: `node -e "console.log('x'.repeat(20 * 1024 * 1024))"`,
       runs: 1,
     });
@@ -536,7 +536,7 @@ test('stress - resource exhaustion prevention', async (t) => {
 
 test('stress - verbose mode', async (t) => {
   await t.test('should not crash in verbose mode with many runs', async () => {
-    const report = await await detectFlakiness({
+    const report = await detectFlakiness({
       testCommand: 'echo "test"',
       runs: 50,
       verbose: true,
@@ -547,7 +547,7 @@ test('stress - verbose mode', async (t) => {
   });
 
   await t.test('should handle verbose mode with failures', async () => {
-    const report = await await detectFlakiness({
+    const report = await detectFlakiness({
       testCommand: 'exit 1',
       runs: 5,
       verbose: true,

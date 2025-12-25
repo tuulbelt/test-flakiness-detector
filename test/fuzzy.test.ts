@@ -56,7 +56,7 @@ test('fuzzy - deterministic test command invariants', async (t) => {
 
     for (const cmd of stableCommands) {
       const runs = randomInt(5, 20);
-      const report = await await detectFlakiness({ testCommand: cmd, runs });
+      const report = await detectFlakiness({ testCommand: cmd, runs });
 
       assert.strictEqual(report.success, true);
       assert.strictEqual(report.totalRuns, runs);
@@ -73,7 +73,7 @@ test('fuzzy - deterministic test command invariants', async (t) => {
   await t.test('run count is always respected', async () => {
     for (let i = 0; i < 20; i++) {
       const runs = randomInt(1, 50);
-      const report = await await detectFlakiness({
+      const report = await detectFlakiness({
         testCommand: 'echo "test"',
         runs,
       });
@@ -94,7 +94,7 @@ test('fuzzy - deterministic test command invariants', async (t) => {
 
     for (const cmd of commands) {
       const runs = randomInt(5, 20);
-      const report = await await detectFlakiness({ testCommand: cmd, runs });
+      const report = await detectFlakiness({ testCommand: cmd, runs });
 
       assert.strictEqual(
         report.totalRuns,
@@ -129,7 +129,7 @@ else
 fi
 `, { mode: 0o755 });
 
-      const report = await await detectFlakiness({
+      const report = await detectFlakiness({
         testCommand: `bash ${scriptPath}`,
         runs,
       });
@@ -177,7 +177,7 @@ test('fuzzy - output capture invariants', async (t) => {
     ];
 
     for (const tc of testCases) {
-      const report = await await detectFlakiness({ testCommand: tc.cmd, runs: 3 });
+      const report = await detectFlakiness({ testCommand: tc.cmd, runs: 3 });
 
       assert.strictEqual(report.success, true);
 
@@ -195,7 +195,7 @@ test('fuzzy - output capture invariants', async (t) => {
   });
 
   await t.test('output is consistent for deterministic commands', async () => {
-    const report = await await detectFlakiness({
+    const report = await detectFlakiness({
       testCommand: 'echo "consistent output"',
       runs: 10,
     });
@@ -211,7 +211,7 @@ test('fuzzy - output capture invariants', async (t) => {
 
 test('fuzzy - exit code handling invariants', async (t) => {
   await t.test('exit code 0 always means success', async () => {
-    const report = await await detectFlakiness({
+    const report = await detectFlakiness({
       testCommand: 'exit 0',
       runs: randomInt(5, 15),
     });
@@ -231,7 +231,7 @@ test('fuzzy - exit code handling invariants', async (t) => {
     const exitCodes = [1, 2, 127, 255];
 
     for (const code of exitCodes) {
-      const report = await await detectFlakiness({
+      const report = await detectFlakiness({
         testCommand: `exit ${code}`,
         runs: randomInt(3, 10),
       });
@@ -256,7 +256,7 @@ test('fuzzy - error handling invariants', async (t) => {
     ];
 
     for (const cmd of invalidCommands) {
-      const report = await await detectFlakiness({
+      const report = await detectFlakiness({
         testCommand: cmd,
         runs: randomInt(1, 5),
       });
@@ -272,7 +272,7 @@ test('fuzzy - error handling invariants', async (t) => {
     const validRuns = [1, 5, 10, 100, 1000];
 
     for (const runs of validRuns) {
-      const report = await await detectFlakiness({
+      const report = await detectFlakiness({
         testCommand: 'echo "test"',
         runs,
       });
@@ -287,7 +287,7 @@ test('fuzzy - error handling invariants', async (t) => {
     const commands = ['echo "test"', 'exit 0', 'exit 1'];
 
     for (const cmd of commands) {
-      const report = await await detectFlakiness({
+      const report = await detectFlakiness({
         testCommand: cmd,
         runs: 3,
       });
@@ -324,7 +324,7 @@ test('fuzzy - performance invariants', async (t) => {
     const runs = 10;
 
     const start = performance.now();
-    const report = await await detectFlakiness({
+    const report = await detectFlakiness({
       testCommand: 'echo "fast"',
       runs,
     });
@@ -371,7 +371,7 @@ else
 fi
 `, { mode: 0o755 });
 
-    const report = await await detectFlakiness({
+    const report = await detectFlakiness({
       testCommand: `bash ${scriptPath}`,
       runs: 10,
     });

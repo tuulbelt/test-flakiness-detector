@@ -14,7 +14,7 @@ test('performance - execution speed', async (t) => {
   await t.test('should complete 10 runs in under 2 seconds', async () => {
     const start = performance.now();
 
-    const report = await await detectFlakiness({
+    const report = await detectFlakiness({
       testCommand: 'echo "test"',
       runs: 10,
     });
@@ -29,7 +29,7 @@ test('performance - execution speed', async (t) => {
   await t.test('should complete 100 runs in under 15 seconds', async () => {
     const start = performance.now();
 
-    const report = await await detectFlakiness({
+    const report = await detectFlakiness({
       testCommand: 'echo "test"',
       runs: 100,
     });
@@ -44,7 +44,7 @@ test('performance - execution speed', async (t) => {
   await t.test('should handle maximum 1000 runs', async () => {
     const start = performance.now();
 
-    const report = await await detectFlakiness({
+    const report = await detectFlakiness({
       testCommand: 'echo "test"',
       runs: 1000,
     });
@@ -94,7 +94,7 @@ test('performance - memory usage', async (t) => {
   await t.test('should handle large output without excessive memory', async () => {
     const initialMemory = process.memoryUsage().heapUsed;
 
-    const report = await await detectFlakiness({
+    const report = await detectFlakiness({
       testCommand: `node -e "for(let i=0; i<10000; i++) console.log('test line' + i)"`,
       runs: 10,
     });
@@ -145,7 +145,7 @@ test('performance - scalability', async (t) => {
   await t.test('should handle fast-failing tests efficiently', async () => {
     const start = performance.now();
 
-    const report = await await detectFlakiness({
+    const report = await detectFlakiness({
       testCommand: 'exit 1',
       runs: 100,
     });
@@ -161,7 +161,7 @@ test('performance - scalability', async (t) => {
 
 test('performance - resource limits', async (t) => {
   await t.test('should respect maximum runs limit', async () => {
-    const report = await await detectFlakiness({
+    const report = await detectFlakiness({
       testCommand: 'echo "test"',
       runs: 1000, // Maximum allowed
     });
@@ -172,7 +172,7 @@ test('performance - resource limits', async (t) => {
 
   await t.test('should handle maximum buffer size (10MB)', async () => {
     // Generate ~5MB of output per run
-    const report = await await detectFlakiness({
+    const report = await detectFlakiness({
       testCommand: `node -e "console.log('x'.repeat(5 * 1024 * 1024))"`,
       runs: 2,
     });
@@ -222,7 +222,7 @@ test('performance - report generation', async (t) => {
     const start = performance.now();
 
     // Use a simple deterministic test (all pass)
-    const report = await await detectFlakiness({
+    const report = await detectFlakiness({
       testCommand: 'exit 0',
       runs: 100,
     });
@@ -257,7 +257,7 @@ echo $((COUNT + 1)) > "${counterFile}"
 exit $(( COUNT % 2 ))
 `, { mode: 0o755 });
 
-    const report = await await detectFlakiness({
+    const report = await detectFlakiness({
       testCommand: `bash ${testScript}`,
       runs: 100,
     });
@@ -286,7 +286,7 @@ test('performance - edge case performance', async (t) => {
   await t.test('should handle minimum runs (1) instantly', async () => {
     const start = performance.now();
 
-    const report = await await detectFlakiness({
+    const report = await detectFlakiness({
       testCommand: 'echo "test"',
       runs: 1,
     });
@@ -300,7 +300,7 @@ test('performance - edge case performance', async (t) => {
   await t.test('should handle empty command output efficiently', async () => {
     const start = performance.now();
 
-    const report = await await detectFlakiness({
+    const report = await detectFlakiness({
       testCommand: 'true', // No output
       runs: 50,
     });
@@ -314,7 +314,7 @@ test('performance - edge case performance', async (t) => {
   await t.test('should handle commands with minimal output', async () => {
     const start = performance.now();
 
-    const report = await await detectFlakiness({
+    const report = await detectFlakiness({
       testCommand: 'echo "x"',
       runs: 100,
     });

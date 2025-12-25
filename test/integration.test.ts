@@ -48,7 +48,7 @@ test('integration - Node.js native test runner', async (t) => {
       });
     `);
 
-    const report = await await detectFlakiness({
+    const report = await detectFlakiness({
       testCommand: `node --test ${testFile}`,
       runs: 5,
     });
@@ -99,7 +99,7 @@ echo "All tests passed"
 exit 0
 `, { mode: 0o755 });
 
-    const report = await await detectFlakiness({
+    const report = await detectFlakiness({
       testCommand: `bash ${scriptFile}`,
       runs: 5,
     });
@@ -167,7 +167,7 @@ fi
       // Ignore if doesn't exist
     }
 
-    const report = await await detectFlakiness({
+    const report = await detectFlakiness({
       testCommand: `bash ${scriptFile}`,
       runs: 5,
     });
@@ -189,7 +189,7 @@ done
 exit 0
 `, { mode: 0o755 });
 
-    const report = await await detectFlakiness({
+    const report = await detectFlakiness({
       testCommand: `bash ${scriptFile}`,
       runs: 2,
     });
@@ -211,7 +211,7 @@ done
 exit 1
 `, { mode: 0o755 });
 
-    const report = await await detectFlakiness({
+    const report = await detectFlakiness({
       testCommand: `bash ${scriptFile}`,
       runs: 2,
     });
@@ -247,7 +247,7 @@ rm -f $TEMP_FILE
 exit $RESULT
 `, { mode: 0o755 });
 
-    const report = await await detectFlakiness({
+    const report = await detectFlakiness({
       testCommand: `bash ${scriptFile}`,
       runs: 5,
     });
@@ -275,7 +275,7 @@ EOF
 exit 0
 `, { mode: 0o755 });
 
-    const report = await await detectFlakiness({
+    const report = await detectFlakiness({
       testCommand: `bash ${scriptFile}`,
       runs: 3,
     });
@@ -300,7 +300,7 @@ exit 0
     const runCounts = [1, 2, 3, 5, 10, 20, 50, 100];
 
     for (const runs of runCounts) {
-      const report = await await detectFlakiness({
+      const report = await detectFlakiness({
         testCommand: `bash ${scriptFile}`,
         runs,
         verbose: false,
@@ -344,7 +344,7 @@ head -c ${size} /dev/zero | tr '\\0' 'x'
 exit 0
 `, { mode: 0o755 });
 
-      const report = await await detectFlakiness({
+      const report = await detectFlakiness({
         testCommand: `bash ${scriptFile}`,
         runs: 2,
       });
@@ -372,7 +372,7 @@ exit 0
 exit ${exitCode}
 `, { mode: 0o755 });
 
-      const report = await await detectFlakiness({
+      const report = await detectFlakiness({
         testCommand: `bash ${scriptFile}`,
         runs: 3,
       });
