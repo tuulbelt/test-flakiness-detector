@@ -145,6 +145,21 @@ npm run test:dogfood
 
 This creates a **bidirectional validation network** where tools prove their reliability by using each other.
 
+## Demo
+
+See the tool in action detecting flaky tests in real-time.
+
+<div style="margin: 20px 0;">
+  <span style="display: inline-block; vertical-align: middle; margin-right: 8px;">
+    <strong>Try it online:</strong>
+  </span>
+  <a href="https://stackblitz.com/github/tuulbelt/tuulbelt/tree/main/test-flakiness-detector" style="display: inline-block; vertical-align: middle;">
+    <img src="https://developer.stackblitz.com/img/open_in_stackblitz.svg" alt="Open in StackBlitz" style="vertical-align: middle;">
+  </a>
+</div>
+
+Run the detector directly in your browser with zero setup. Test different commands, adjust run counts, and explore flakiness detection patterns.
+
 ## Part of Tuulbelt
 
 This tool is part of [Tuulbelt](https://github.com/tuulbelt/tuulbelt) - a collection of focused, zero-dependency tools for modern software development.
