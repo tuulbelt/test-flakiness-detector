@@ -11,7 +11,7 @@ import type { Config, FlakinessReport } from '../src/index.js';
 
 test('detectFlakiness - basic functionality', async (t) => {
   await t.test('should run test command multiple times', async () => {
-    const report = await await detectFlakiness({
+    const report = await detectFlakiness({
       testCommand: 'echo "test passed"',
       runs: 5,
       verbose: false,
@@ -26,7 +26,7 @@ test('detectFlakiness - basic functionality', async (t) => {
   });
 
   await t.test('should detect all failing tests', async () => {
-    const report = await await detectFlakiness({
+    const report = await detectFlakiness({
       testCommand: 'exit 1',
       runs: 3,
       verbose: false,
@@ -40,7 +40,7 @@ test('detectFlakiness - basic functionality', async (t) => {
   });
 
   await t.test('should use default runs value of 10', async () => {
-    const report = await await detectFlakiness({
+    const report = await detectFlakiness({
       testCommand: 'echo "test"',
     });
 
@@ -50,7 +50,7 @@ test('detectFlakiness - basic functionality', async (t) => {
   });
 
   await t.test('should capture stdout and stderr', async () => {
-    const report = await await detectFlakiness({
+    const report = await detectFlakiness({
       testCommand: 'echo "stdout output"',
       runs: 1,
     });
@@ -63,7 +63,7 @@ test('detectFlakiness - basic functionality', async (t) => {
 
 test('detectFlakiness - input validation', async (t) => {
   await t.test('should reject empty test command', async () => {
-    const report = await await detectFlakiness({
+    const report = await detectFlakiness({
       testCommand: '',
       runs: 5,
     });
@@ -73,7 +73,7 @@ test('detectFlakiness - input validation', async (t) => {
   });
 
   await t.test('should reject non-string test command', async () => {
-    const report = await await detectFlakiness({
+    const report = await detectFlakiness({
       testCommand: null as unknown as string,
       runs: 5,
     });
@@ -83,7 +83,7 @@ test('detectFlakiness - input validation', async (t) => {
   });
 
   await t.test('should reject runs less than 1', async () => {
-    const report = await await detectFlakiness({
+    const report = await detectFlakiness({
       testCommand: 'echo "test"',
       runs: 0,
     });
@@ -93,7 +93,7 @@ test('detectFlakiness - input validation', async (t) => {
   });
 
   await t.test('should reject runs greater than 1000', async () => {
-    const report = await await detectFlakiness({
+    const report = await detectFlakiness({
       testCommand: 'echo "test"',
       runs: 1001,
     });
@@ -103,7 +103,7 @@ test('detectFlakiness - input validation', async (t) => {
   });
 
   await t.test('should accept runs of 1', async () => {
-    const report = await await detectFlakiness({
+    const report = await detectFlakiness({
       testCommand: 'echo "test"',
       runs: 1,
     });
@@ -113,7 +113,7 @@ test('detectFlakiness - input validation', async (t) => {
   });
 
   await t.test('should accept runs of 1000', async () => {
-    const report = await await detectFlakiness({
+    const report = await detectFlakiness({
       testCommand: 'echo "test"',
       runs: 1000,
     });
@@ -143,7 +143,7 @@ echo $((COUNT + 1)) > "${counterFile}"
 exit $(( COUNT % 2 ))
 `, { mode: 0o755 });
 
-    const report = await await detectFlakiness({
+    const report = await detectFlakiness({
       testCommand: `bash ${testScript}`,
       runs: 100,
       verbose: false,
@@ -200,7 +200,7 @@ else
 fi
 `, { mode: 0o755 });
 
-    const report = await await detectFlakiness({
+    const report = await detectFlakiness({
       testCommand: `bash ${testScript}`,
       runs: 100,
       verbose: false,
@@ -226,7 +226,7 @@ fi
 
 test('detectFlakiness - test run results', async (t) => {
   await t.test('should record success for passing tests', async () => {
-    const report = await await detectFlakiness({
+    const report = await detectFlakiness({
       testCommand: 'exit 0',
       runs: 2,
     });
@@ -239,7 +239,7 @@ test('detectFlakiness - test run results', async (t) => {
   });
 
   await t.test('should record failure for failing tests', async () => {
-    const report = await await detectFlakiness({
+    const report = await detectFlakiness({
       testCommand: 'exit 1',
       runs: 2,
     });
@@ -252,7 +252,7 @@ test('detectFlakiness - test run results', async (t) => {
   });
 
   await t.test('should handle different exit codes', async () => {
-    const report = await await detectFlakiness({
+    const report = await detectFlakiness({
       testCommand: 'exit 42',
       runs: 1,
     });
@@ -264,7 +264,7 @@ test('detectFlakiness - test run results', async (t) => {
 
 test('detectFlakiness - verbose mode', async (t) => {
   await t.test('should run without errors in verbose mode', async () => {
-    const report = await await detectFlakiness({
+    const report = await detectFlakiness({
       testCommand: 'echo "test"',
       runs: 3,
       verbose: true,
@@ -277,7 +277,7 @@ test('detectFlakiness - verbose mode', async (t) => {
 
 test('detectFlakiness - edge cases', async (t) => {
   await t.test('should handle commands with arguments', async () => {
-    const report = await await detectFlakiness({
+    const report = await detectFlakiness({
       testCommand: 'echo "hello world"',
       runs: 2,
     });
@@ -287,7 +287,7 @@ test('detectFlakiness - edge cases', async (t) => {
   });
 
   await t.test('should handle commands with pipes', async () => {
-    const report = await await detectFlakiness({
+    const report = await detectFlakiness({
       testCommand: 'echo "test" | grep "test"',
       runs: 2,
     });
@@ -298,7 +298,7 @@ test('detectFlakiness - edge cases', async (t) => {
   });
 
   await t.test('should handle long-running commands', async () => {
-    const report = await await detectFlakiness({
+    const report = await detectFlakiness({
       testCommand: 'sleep 0.1 && echo "done"',
       runs: 2,
     });
@@ -310,7 +310,7 @@ test('detectFlakiness - edge cases', async (t) => {
 
 test('detectFlakiness - error scenarios', async (t) => {
   await t.test('should handle non-existent commands', async () => {
-    const report = await await detectFlakiness({
+    const report = await detectFlakiness({
       testCommand: 'nonexistent-command-xyz123',
       runs: 1,
     });
@@ -322,7 +322,7 @@ test('detectFlakiness - error scenarios', async (t) => {
   });
 
   await t.test('should handle command syntax errors', async () => {
-    const report = await await detectFlakiness({
+    const report = await detectFlakiness({
       testCommand: 'echo "unclosed quote',
       runs: 1,
     });
@@ -357,7 +357,7 @@ test('detectFlakiness - configuration interface', async (t) => {
 
 test('FlakinessReport structure', async (t) => {
   await t.test('should have all required fields', async () => {
-    const report = await await detectFlakiness({
+    const report = await detectFlakiness({
       testCommand: 'echo "test"',
       runs: 1,
     });
@@ -387,7 +387,7 @@ echo $((COUNT + 1)) > "${counterFile}"
 exit $(( COUNT % 2 ))
 `, { mode: 0o755 });
 
-    const report = await await detectFlakiness({
+    const report = await detectFlakiness({
       testCommand: `bash ${testScript}`,
       runs: 50,
     });
