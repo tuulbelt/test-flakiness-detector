@@ -38,7 +38,7 @@ test.after(() => {
 
 test('integration - Node.js native test runner', async (t) => {
   await t.test('should handle stable Node.js tests', async () => {
-    const testFile = join(FIXTURES_DIR, 'stable-node-test.js');
+    const testFile = join(FIXTURES_DIR, `stable-node-test-${Date.now()}-${Math.random().toString(36).slice(2)}.js`);
     writeFileSync(testFile, `
       import { test } from 'node:test';
       import assert from 'node:assert/strict';
@@ -57,12 +57,19 @@ test('integration - Node.js native test runner', async (t) => {
     assert.strictEqual(report.passedRuns, 5);
     assert.strictEqual(report.failedRuns, 0);
     assert.strictEqual(report.flakyTests.length, 0);
+
+    // Clean up
+    try {
+      rmSync(testFile);
+    } catch (err) {
+      // Ignore cleanup errors
+    }
   });
 });
 
 test('integration - Shell scripts with deterministic patterns', async (t) => {
   await t.test('should detect flaky shell scripts with predetermined sequence', async () => {
-    const scriptFile = join(FIXTURES_DIR, 'flaky-script.sh');
+    const scriptFile = join(FIXTURES_DIR, `flaky-script-${Date.now()}-${Math.random().toString(36).slice(2)}.sh`);
     writeFileSync(scriptFile, `#!/bin/bash
 # Deterministic: Pass on even run numbers, fail on odd
 RUN_NUM=\${TEST_RUN_NUMBER:-0}
@@ -90,10 +97,17 @@ fi
     // Verify deterministic pattern
     assert.strictEqual(passedRuns, 5);
     assert.strictEqual(failedRuns, 5);
+
+    // Clean up
+    try {
+      rmSync(scriptFile);
+    } catch (err) {
+      // Ignore cleanup errors
+    }
   });
 
   await t.test('should handle stable shell scripts', async () => {
-    const scriptFile = join(FIXTURES_DIR, 'stable-script.sh');
+    const scriptFile = join(FIXTURES_DIR, `stable-script-${Date.now()}-${Math.random().toString(36).slice(2)}.sh`);
     writeFileSync(scriptFile, `#!/bin/bash
 echo "All tests passed"
 exit 0
@@ -108,12 +122,19 @@ exit 0
     assert.strictEqual(report.passedRuns, 5);
     assert.strictEqual(report.failedRuns, 0);
     assert.strictEqual(report.flakyTests.length, 0);
+
+    // Clean up
+    try {
+      rmSync(scriptFile);
+    } catch (err) {
+      // Ignore cleanup errors
+    }
   });
 });
 
 test('integration - Environment-based testing', async (t) => {
   await t.test('should detect environment variable dependency', async () => {
-    const scriptFile = join(FIXTURES_DIR, 'env-test.sh');
+    const scriptFile = join(FIXTURES_DIR, `env-test-${Date.now()}-${Math.random().toString(36).slice(2)}.sh`);
     writeFileSync(scriptFile, `#!/bin/bash
 # Fails if FLAKY_ENV is not set
 [ -n "$FLAKY_ENV" ] && exit 0 || exit 1
@@ -136,13 +157,21 @@ test('integration - Environment-based testing', async (t) => {
 
     assert.strictEqual(report2.passedRuns, 3);
     assert.strictEqual(report2.flakyTests.length, 0); // All pass = not flaky
+
+    // Clean up
+    try {
+      rmSync(scriptFile);
+    } catch (err) {
+      // Ignore cleanup errors
+    }
   });
 });
 
 test('integration - File system operations', async (t) => {
   await t.test('should handle tests with proper cleanup', async () => {
-    const scriptFile = join(FIXTURES_DIR, 'file-cleanup.sh');
-    const testDataFile = join(FIXTURES_DIR, 'test-data.txt');
+    const uniqueId = `${Date.now()}-${Math.random().toString(36).slice(2)}`;
+    const scriptFile = join(FIXTURES_DIR, `file-cleanup-${uniqueId}.sh`);
+    const testDataFile = join(FIXTURES_DIR, `test-data-${uniqueId}.txt`);
 
     writeFileSync(scriptFile, `#!/bin/bash
 TEST_FILE="${testDataFile}"
@@ -175,12 +204,20 @@ fi
     assert.strictEqual(report.success, true);
     assert.strictEqual(report.totalRuns, 5);
     assert.strictEqual(report.passedRuns, 5);
+
+    // Clean up
+    try {
+      rmSync(scriptFile);
+      rmSync(testDataFile);
+    } catch (err) {
+      // Ignore cleanup errors
+    }
   });
 });
 
 test('integration - Large output handling', async (t) => {
   await t.test('should handle tests with large stdout', async () => {
-    const scriptFile = join(FIXTURES_DIR, 'large-output.sh');
+    const scriptFile = join(FIXTURES_DIR, `large-output-${Date.now()}-${Math.random().toString(36).slice(2)}.sh`);
     writeFileSync(scriptFile, `#!/bin/bash
 # Generate large output (1MB)
 for i in {1..10000}; do
@@ -199,10 +236,17 @@ exit 0
 
     // Verify output was captured
     assert(report.runs[0].stdout.length > 100000);
+
+    // Clean up
+    try {
+      rmSync(scriptFile);
+    } catch (err) {
+      // Ignore cleanup errors
+    }
   });
 
   await t.test('should handle tests with large stderr', async () => {
-    const scriptFile = join(FIXTURES_DIR, 'large-stderr.sh');
+    const scriptFile = join(FIXTURES_DIR, `large-stderr-${Date.now()}-${Math.random().toString(36).slice(2)}.sh`);
     writeFileSync(scriptFile, `#!/bin/bash
 # Generate large stderr output
 for i in {1..1000}; do
@@ -221,12 +265,19 @@ exit 1
 
     // Verify stderr was captured
     assert(report.runs[0].stderr.length > 10000);
+
+    // Clean up
+    try {
+      rmSync(scriptFile);
+    } catch (err) {
+      // Ignore cleanup errors
+    }
   });
 });
 
 test('integration - Real-world test patterns', async (t) => {
   await t.test('should handle test suite with setup/teardown', async () => {
-    const scriptFile = join(FIXTURES_DIR, 'suite-with-setup.sh');
+    const scriptFile = join(FIXTURES_DIR, `suite-with-setup-${Date.now()}-${Math.random().toString(36).slice(2)}.sh`);
     writeFileSync(scriptFile, `#!/bin/bash
 # Setup
 TEMP_FILE=$(mktemp)
@@ -255,12 +306,19 @@ exit $RESULT
     assert.strictEqual(report.success, true);
     assert.strictEqual(report.passedRuns, 5);
     assert.strictEqual(report.flakyTests.length, 0);
+
+    // Clean up
+    try {
+      rmSync(scriptFile);
+    } catch (err) {
+      // Ignore cleanup errors
+    }
   });
 });
 
 test('integration - Complex multi-line output', async (t) => {
   await t.test('should preserve multi-line test output', async () => {
-    const scriptFile = join(FIXTURES_DIR, 'multiline-output.sh');
+    const scriptFile = join(FIXTURES_DIR, `multiline-output-${Date.now()}-${Math.random().toString(36).slice(2)}.sh`);
     writeFileSync(scriptFile, `#!/bin/bash
 cat <<EOF
 TAP version 13
@@ -286,12 +344,19 @@ exit 0
     // Verify multi-line output is preserved
     assert(report.runs[0].stdout.includes('TAP version 13'));
     assert(report.runs[0].stdout.includes('# pass 3'));
+
+    // Clean up
+    try {
+      rmSync(scriptFile);
+    } catch (err) {
+      // Ignore cleanup errors
+    }
   });
 });
 
 test('fuzzing - Invariant testing with random inputs', async (t) => {
   await t.test('should maintain invariants across varied run counts', async () => {
-    const scriptFile = join(FIXTURES_DIR, `always-pass-${Date.now()}.sh`);
+    const scriptFile = join(FIXTURES_DIR, `always-pass-${Date.now()}-${Math.random().toString(36).slice(2)}.sh`);
     writeFileSync(scriptFile, `#!/bin/bash
 exit 0
 `, { mode: 0o755 });
@@ -337,7 +402,7 @@ exit 0
     const outputSizes = [0, 1, 10, 100, 1000, 10000, 100000];
 
     for (const size of outputSizes) {
-      const scriptFile = join(FIXTURES_DIR, `fuzzing-output-${size}.sh`);
+      const scriptFile = join(FIXTURES_DIR, `fuzzing-output-${size}-${Date.now()}-${Math.random().toString(36).slice(2)}.sh`);
       writeFileSync(scriptFile, `#!/bin/bash
 # Generate exactly ${size} bytes of output
 head -c ${size} /dev/zero | tr '\\0' 'x'
@@ -367,7 +432,7 @@ exit 0
     const exitCodes = [0, 1, 2, 42, 127, 255];
 
     for (const exitCode of exitCodes) {
-      const scriptFile = join(FIXTURES_DIR, `fuzzing-exit-${exitCode}.sh`);
+      const scriptFile = join(FIXTURES_DIR, `fuzzing-exit-${exitCode}-${Date.now()}-${Math.random().toString(36).slice(2)}.sh`);
       writeFileSync(scriptFile, `#!/bin/bash
 exit ${exitCode}
 `, { mode: 0o755 });
