@@ -135,12 +135,12 @@ npx tsx src/index.ts --test "npm test" --runs 20 --verbose
 
 This provides live run counts and pass/fail status during long detection runs.
 
-**Validates Other Tools** — The [Cross-Platform Path Normalizer](../../cross-platform-path-normalizer/) uses this detector to validate its 145 tests are non-flaky:
+**Validates Other Tools** — The [Cross-Platform Path Normalizer](../../cross-platform-path-normalizer/) uses this detector to validate its 128 tests are non-flaky:
 
 ```bash
 cd ../cross-platform-path-normalizer
 npm run test:dogfood
-# ✅ NO FLAKINESS DETECTED (145 tests × 10 runs = 1,450 executions)
+# ✅ NO FLAKINESS DETECTED (128 tests × 10 runs = 1,280 executions)
 ```
 
 This creates a **bidirectional validation network** where tools prove their reliability by using each other.
