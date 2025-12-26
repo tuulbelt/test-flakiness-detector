@@ -1,9 +1,7 @@
-{"version": 2, "width": 80, "height": 24, "timestamp": 1766759483, "env": {"SHELL": "/bin/bash", "TERM": "xterm-256color"}, "title": "Test Flakiness Detector - Tuulbelt"}
-[0.00449, "o", "# Test Flakiness Detector Demo\r\n"]
-[1.006041, "o", "$ npx tsx src/index.ts --test \"echo test\" --runs 5\r\n"]
-[2.085661, "o", "{\r\n  \"success\": true,\r\n  \"totalRuns\": 5,\r\n  \"passedRuns\": 5,\r\n  \"failedRuns\": 0,\r\n  \"flakyTests\": [],\r\n  \"runs\": [\r\n    {\r\n      \"success\": true,\r\n      \"exitCode\": 0,\r\n      \"stdout\": \"test\\n\",\r\n      \"stderr\": \"\"\r\n    },\r\n    {\r\n      \"success\": true,\r\n      \"exitCode\": 0,\r\n      \"stdout\": \"test\\n\",\r\n      \"stderr\": \"\"\r\n    },\r\n    {\r\n      \"success\": true,\r\n      \"exitCode\": 0,\r\n      \"stdout\": \"test\\n\",\r\n      \"stderr\": \"\"\r\n    },\r\n    {\r\n      \"success\": true,\r\n      \"exitCode\": 0,\r\n      \"stdout\": \"test\\n\",\r\n"]
-[2.085725, "o", "      \"stderr\": \"\"\r\n    },\r\n    {\r\n      \"success\": true,\r\n      \"exitCode\": 0,\r\n      \"stdout\": \"test\\n\",\r\n      \"stderr\": \"\"\r\n    }\r\n  ]\r\n}\r\n"]
-[4.105826, "o", "\r\n# Show JSON report summary\r\n"]
-[4.607454, "o", "$ cat flakiness-report.json | head -15\r\n"]
-[5.109121, "o", "{\r\n  \"summary\": {\r\n    \"totalRuns\": 5,\r\n    \"passedRuns\": 5,\r\n    \"failedRuns\": 0,\r\n    \"isFlaky\": false,\r\n    \"failureRate\": 0\r\n  }\r\n"]
-[5.109155, "o", "}\r\n"]
+{"version": 2, "width": 80, "height": 24, "timestamp": 1766766400, "env": {"SHELL": "/bin/bash", "TERM": "xterm-256color"}, "title": "Test Flakiness Detector - Tuulbelt"}
+[0.004234, "o", "# Test Flakiness Detector Demo\r\n"]
+[1.005563, "o", "$ npx tsx src/index.ts --test \"echo test\" --runs 5\r\n"]
+[2.066338, "o", "{\r\n  \"success\": true,\r\n  \"totalRuns\": 5,\r\n  \"passedRuns\": 5,\r\n  \"failedRuns\": 0,\r\n  \"flakyTests\": [],\r\n  \"runs\": [\r\n    {\r\n      \"success\": true,\r\n      \"exitCode\": 0,\r\n      \"stdout\": \"test\\n\",\r\n      \"stderr\": \"\"\r\n    },\r\n    {\r\n      \"success\": true,\r\n      \"exitCode\": 0,\r\n      \"stdout\": \"test\\n\",\r\n      \"stderr\": \"\"\r\n    },\r\n    {\r\n      \"success\": true,\r\n      \"exitCode\": 0,\r\n      \"stdout\": \"test\\n\",\r\n      \"stderr\": \"\"\r\n    },\r\n    {\r\n      \"success\": true,\r\n      \"exitCode\": 0,\r\n      \"stdout\": \"test\\n\",\r\n      \"stderr\": \"\"\r\n    },\r\n    {\r\n      \"success\": true,\r\n      \"exitCode\": 0,\r\n      \"stdout\": \"test\\n\",\r\n      \"stderr\": \"\"\r\n    }\r\n  ]\r\n}\r\n"]
+[4.08567, "o", "\r\n# Show JSON report summary\r\n"]
+[4.587244, "o", "$ cat flakiness-report.json | head -15\r\n"]
+[5.088902, "o", "{\r\n  \"summary\": {\r\n    \"totalRuns\": 5,\r\n    \"passedRuns\": 5,\r\n    \"failedRuns\": 0,\r\n    \"isFlaky\": false,\r\n    \"failureRate\": 0\r\n  }\r\n}\r\n"]
