@@ -1,7 +1,0 @@
-{"version": 2, "width": 80, "height": 24, "timestamp": 1766757915, "env": {"SHELL": "/bin/bash", "TERM": "xterm-256color"}, "title": "Test Flakiness Detector - Tuulbelt"}
-[0.004354, "o", "# Test Flakiness Detector Demo\r\n"]
-[1.005855, "o", "$ npx tsx src/index.ts --test \"echo test\" --runs 5\r\n"]
-[2.072056, "o", "{\r\n  \"success\": true,\r\n  \"totalRuns\": 5,\r\n  \"passedRuns\": 5,\r\n  \"failedRuns\": 0,\r\n  \"flakyTests\": [],\r\n  \"runs\": [\r\n    {\r\n      \"success\": true,\r\n      \"exitCode\": 0,\r\n      \"stdout\": \"test\\n\",\r\n      \"stderr\": \"\"\r\n    },\r\n    {\r\n      \"success\": true,\r\n      \"exitCode\": 0,\r\n      \"stdout\": \"test\\n\",\r\n      \"stderr\": \"\"\r\n    },\r\n    {\r\n      \"success\": true,\r\n      \"exitCode\": 0,\r\n      \"stdout\": \"test\\n\",\r\n      \"stderr\": \"\"\r\n    },\r\n    {\r\n      \"success\": true,\r\n      \"exitCode\": 0,\r\n      \"stdout\": \"test\\n\",\r\n      \"stderr\": \"\"\r\n    },\r\n    {\r\n      \"success\": true,\r\n      \"exitCode\": 0,\r\n      \"stdout\": \"test\\n\",\r\n      \"stderr\": \"\"\r\n    }\r\n  ]\r\n}\r\n"]
-[4.091543, "o", "\r\n# Show JSON report summary\r\n"]
-[4.593027, "o", "$ cat flakiness-report.json | head -15\r\n"]
-[5.09469, "o", "{\r\n  \"summary\": {\r\n    \"totalRuns\": 5,\r\n    \"passedRuns\": 5,\r\n    \"failedRuns\": 0,\r\n    \"isFlaky\": false,\r\n    \"failureRate\": 0\r\n  }\r\n}\r\n"]
