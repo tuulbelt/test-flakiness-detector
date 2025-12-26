@@ -431,11 +431,12 @@ See [SPEC.md](SPEC.md) for detailed technical specification.
 
 
 
+
 ## Demo
 
 ![Demo](docs/demo.gif)
 
-**[▶ View interactive recording on asciinema.org](https://asciinema.org/a/1G3cuGyqdgxtf5BIF0pl1lJrh)**
+**[▶ View interactive recording on asciinema.org](https://asciinema.org/a/5wNe9GVosBorzPPDFHaNvWvT4)**
 
 > Try it online: [![Open in StackBlitz](https://developer.stackblitz.com/img/open_in_stackblitz.svg)](https://stackblitz.com/github/tuulbelt/tuulbelt/tree/main/test-flakiness-detector)
 
