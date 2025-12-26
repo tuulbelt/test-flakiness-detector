@@ -357,9 +357,10 @@ The test suite includes:
 
 ### Dogfooding: Tool Composition
 
-This tool demonstrates how Tuulbelt tools work together:
+This tool demonstrates the power of composability by both USING and VALIDATING other Tuulbelt tools:
 
-**1. Uses CLI Progress Reporting (when in monorepo)**
+#### 1. Uses CLI Progress Reporting (Library Integration)
+
 ```bash
 npx tsx src/index.ts --test "npm test" --runs 10 --verbose
 # [INFO] Progress tracking enabled (dogfooding cli-progress-reporting)
@@ -374,15 +375,37 @@ The flakiness detector integrates **cli-progress-reporting** to show real-time p
 - Real-world validation of the progress reporting tool
 - Graceful fallback when cloned standalone
 
-**2. Validated by Cross-Platform Path Normalizer**
+#### 2. High-Value Composition Scripts
 
-The path normalizer uses this tool to verify its 145 tests are non-flaky:
+**Output Diffing Utility** - Find ROOT CAUSE of flaky tests:
 ```bash
-cd ../cross-platform-path-normalizer
-npm run test:dogfood
-# ✅ NO FLAKINESS DETECTED
-# All 10 test runs passed consistently
+./scripts/dogfood-diff.sh "npm test"
+# Compares outputs between runs to see WHAT changes
+# Helps identify: timestamps, random data, race conditions
 ```
+
+**Cross-Platform Path Normalizer** - Validate path handling reliability:
+```bash
+./scripts/dogfood-paths.sh 10
+# ✅ NO FLAKINESS DETECTED
+# 145 tests × 10 runs = 1,450 executions
+```
+
+**CLI Progress Reporting** - Bidirectional validation:
+```bash
+./scripts/dogfood-progress.sh 20
+# Validates the tool we USE (bidirectional relationship)
+# 125 tests × 20 runs = 2,500 executions
+```
+
+**Complete Phase 1 Validation Pipeline** - Validate all tools:
+```bash
+./scripts/dogfood-pipeline.sh 10
+# Validates all 5 Phase 1 tools
+# 602 tests × 10 runs = 6,020 total test executions
+```
+
+See `DOGFOODING_STRATEGY.md` for implementation details.
 
 ## Error Handling
 

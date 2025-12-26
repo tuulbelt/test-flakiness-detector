@@ -122,9 +122,11 @@ No runtime dependencies. Just Node.js 18+.
 
 ## Dogfooding: Tools Working Together
 
-This tool demonstrates Tuulbelt's composability:
+This tool demonstrates the power of composability by both USING and VALIDATING other Tuulbelt tools:
 
-**Uses CLI Progress Reporting** — When running ≥5 iterations, the flakiness detector integrates [CLI Progress Reporting](../../cli-progress-reporting/) to show real-time progress updates:
+### Uses CLI Progress Reporting (Library Integration)
+
+When running ≥5 iterations, the flakiness detector integrates [CLI Progress Reporting](/tools/cli-progress-reporting/) to show real-time progress updates:
 
 ```bash
 npx tsx src/index.ts --test "npm test" --runs 20 --verbose
@@ -133,17 +135,41 @@ npx tsx src/index.ts --test "npm test" --runs 20 --verbose
 # [INFO] Run 2/20 passed (2 passed, 0 failed)
 ```
 
-This provides live run counts and pass/fail status during long detection runs.
+This provides live run counts and pass/fail status during long detection runs, with graceful fallback when cloned standalone.
 
-**Validates Other Tools** — The [Cross-Platform Path Normalizer](../../cross-platform-path-normalizer/) uses this detector to validate its 128 tests are non-flaky:
+### High-Value Composition Scripts
 
+**[Output Diffing Utility](/tools/output-diffing-utility/)** — Find ROOT CAUSE of flaky tests:
 ```bash
-cd ../cross-platform-path-normalizer
-npm run test:dogfood
-# ✅ NO FLAKINESS DETECTED (128 tests × 10 runs = 1,280 executions)
+./scripts/dogfood-diff.sh "npm test"
+# Compares outputs between runs to see WHAT changes
+# Helps identify: timestamps, random data, race conditions
 ```
 
-This creates a **bidirectional validation network** where tools prove their reliability by using each other.
+**[Cross-Platform Path Normalizer](/tools/cross-platform-path-normalizer/)** — Validate path handling reliability:
+```bash
+./scripts/dogfood-paths.sh 10
+# ✅ NO FLAKINESS DETECTED
+# 145 tests × 10 runs = 1,450 executions
+```
+
+**[CLI Progress Reporting](/tools/cli-progress-reporting/)** — Bidirectional validation:
+```bash
+./scripts/dogfood-progress.sh 20
+# Validates the tool we USE (bidirectional relationship)
+# 125 tests × 20 runs = 2,500 executions
+```
+
+**Complete Phase 1 Validation Pipeline** — Validate all tools:
+```bash
+./scripts/dogfood-pipeline.sh 10
+# Validates all 5 Phase 1 tools
+# 602 tests × 10 runs = 6,020 total test executions
+```
+
+This creates a **bidirectional validation network** where tools prove their reliability by using each other in production workflows.
+
+See `DOGFOODING_STRATEGY.md` in the repository for implementation details.
 
 ## Demo
 
