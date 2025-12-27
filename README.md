@@ -350,6 +350,13 @@ Try the tool instantly in your browser without installing anything!
 - **No timeout**: Waits for command completion to avoid flagging slow tests as flaky
 - **Result pattern**: Returns structured result object, never throws exceptions
 
+## Security
+
+- **Trusted commands only**: The `--test` command is executed via shell—only run trusted commands
+- **Same trust model**: This tool has the same security model as `npm run-script`, `make`, or any build tool
+- **Resource limits**: 10MB buffer limit per command output, max 1000 runs
+- **No privilege escalation**: User runs their own commands with their own permissions
+
 ## Testing
 
 ```bash
