@@ -6,6 +6,7 @@
 git clone https://github.com/tuulbelt/tuulbelt.git
 cd tuulbelt/test-flakiness-detector
 npm install
+npm link     # Enable the 'flaky' command globally
 ```
 
 ## Basic Usage
