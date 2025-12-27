@@ -35,7 +35,16 @@ Clone the repository:
 git clone https://github.com/tuulbelt/tuulbelt.git
 cd tuulbelt/test-flakiness-detector
 npm install  # Install dev dependencies only
-npm link     # Enable the 'flaky' command globally
+```
+
+**CLI names** - both short and long forms work:
+- Short (recommended): `flaky`
+- Long: `test-flakiness-detector`
+
+**Recommended setup** - install globally for easy access:
+```bash
+npm link  # Enable the 'flaky' command globally
+flaky --help
 ```
 
 No runtime dependencies — this tool uses only Node.js standard library.
