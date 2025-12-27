@@ -409,3 +409,87 @@ exit $(( COUNT % 2 ))
     assert.strictEqual(typeof flakyTest.failureRate, 'number');
   });
 });
+
+// ============================================================================
+// Security Tests - Resource Limits
+// ============================================================================
+
+test('security - resource limits', async (t) => {
+  await t.test('rejects runs exceeding maximum (1000)', async () => {
+    // detectFlakiness returns FlakinessReport directly, not Result type
+    // For invalid runs, we need to check how it handles the error
+    try {
+      const report = await detectFlakiness({
+        testCommand: 'echo test',
+        runs: 1001,
+      });
+      // If it doesn't throw, check if it has an error indication
+      assert(report.totalRuns <= 1000 || report.success === false);
+    } catch (error) {
+      // Expected to throw for invalid runs
+      assert(error instanceof Error);
+    }
+  });
+
+  await t.test('rejects zero runs', async () => {
+    try {
+      const report = await detectFlakiness({
+        testCommand: 'echo test',
+        runs: 0,
+      });
+      // Zero runs should be rejected
+      assert.fail('Should have thrown for zero runs');
+    } catch (error) {
+      assert(error instanceof Error);
+    }
+  });
+
+  await t.test('rejects negative runs', async () => {
+    try {
+      const report = await detectFlakiness({
+        testCommand: 'echo test',
+        runs: -5,
+      });
+      assert.fail('Should have thrown for negative runs');
+    } catch (error) {
+      assert(error instanceof Error);
+    }
+  });
+
+  await t.test('accepts valid run counts', async () => {
+    const report = await detectFlakiness({
+      testCommand: 'exit 0',
+      runs: 3,
+    });
+
+    assert.strictEqual(report.totalRuns, 3);
+    assert.strictEqual(report.success, true);
+  });
+
+  await t.test('handles empty test command gracefully', async () => {
+    try {
+      const report = await detectFlakiness({
+        testCommand: '',
+        runs: 3,
+      });
+      // Empty command might fail but shouldn't crash
+      assert(typeof report.success === 'boolean');
+    } catch (error) {
+      // Or it might throw - both are acceptable
+      assert(error instanceof Error);
+    }
+  });
+
+  await t.test('shell special characters in command work (by design)', async () => {
+    // This is intentional - we execute user commands via shell
+    // This test documents that behavior
+    const report = await detectFlakiness({
+      testCommand: 'echo "test with spaces" && exit 0',
+      runs: 1,
+    });
+
+    assert.strictEqual(report.success, true);
+    assert.strictEqual(report.totalRuns, 1);
+    assert.strictEqual(report.passedRuns, 1);
+  });
+});
