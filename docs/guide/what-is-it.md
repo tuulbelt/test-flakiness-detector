@@ -34,7 +34,7 @@ Works with **any test framework**:
 
 ### Simple Interface
 ```bash
-npx tsx src/index.ts --test "npm test" --runs 20
+flaky --test "npm test" --runs 20
 ```
 
 That's it. No configuration files, no setup, no plugins.
@@ -56,7 +56,7 @@ Get a JSON report with:
 
 ```bash
 # Run your tests 50 times to find flaky ones
-npx tsx src/index.ts --test "npm test" --runs 50
+flaky --test "npm test" --runs 50
 ```
 
 Output:

@@ -5,7 +5,7 @@ Command-line interface for Test Flakiness Detector.
 ## Basic Syntax
 
 ```bash
-npx tsx src/index.ts [options]
+flaky [options]
 ```
 
 ## Options
@@ -15,7 +15,7 @@ npx tsx src/index.ts [options]
 **Required.** The test command to execute repeatedly.
 
 ```bash
-npx tsx src/index.ts --test "npm test"
+flaky --test "npm test"
 ```
 
 ### `--runs <number>`
@@ -23,7 +23,7 @@ npx tsx src/index.ts --test "npm test"
 **Optional.** Number of times to run the tests. Default: `10`
 
 ```bash
-npx tsx src/index.ts --test "npm test" --runs 20
+flaky --test "npm test" --runs 20
 ```
 
 ### `--verbose`
@@ -31,7 +31,7 @@ npx tsx src/index.ts --test "npm test" --runs 20
 **Optional.** Enable verbose output showing each run's result. Default: `false`
 
 ```bash
-npx tsx src/index.ts --test "npm test" --verbose
+flaky --test "npm test" --verbose
 ```
 
 ## Examples
@@ -39,35 +39,35 @@ npx tsx src/index.ts --test "npm test" --verbose
 ### Basic Flakiness Detection
 
 ```bash
-npx tsx src/index.ts --test "npm test" --runs 10
+flaky --test "npm test" --runs 10
 ```
 
 ### With Verbose Output
 
 ```bash
-npx tsx src/index.ts --test "npm test" --runs 20 --verbose
+flaky --test "npm test" --runs 20 --verbose
 ```
 
 ### Different Test Frameworks
 
 **Jest:**
 ```bash
-npx tsx src/index.ts --test "npm run test:jest" --runs 15
+flaky --test "npm run test:jest" --runs 15
 ```
 
 **Pytest:**
 ```bash
-npx tsx src/index.ts --test "pytest tests/" --runs 20
+flaky --test "pytest tests/" --runs 20
 ```
 
 **Cargo:**
 ```bash
-npx tsx src/index.ts --test "cargo test" --runs 10
+flaky --test "cargo test" --runs 10
 ```
 
 **Go:**
 ```bash
-npx tsx src/index.ts --test "go test ./..." --runs 15
+flaky --test "go test ./..." --runs 15
 ```
 
 ## Output Format
@@ -113,7 +113,7 @@ The tool outputs JSON to stdout:
 ```yaml
 - name: Detect flaky tests
   run: |
-    npx tsx src/index.ts --test "npm test" --runs 20 > flakiness-report.json
+    flaky --test "npm test" --runs 20 > flakiness-report.json
 
 - name: Check for flakiness
   run: |
@@ -130,7 +130,7 @@ The tool outputs JSON to stdout:
 ```yaml
 test:flakiness:
   script:
-    - npx tsx src/index.ts --test "npm test" --runs 20
+    - flaky --test "npm test" --runs 20
   artifacts:
     paths:
       - flakiness-report.json
@@ -142,7 +142,7 @@ test:flakiness:
 ```groovy
 stage('Flakiness Detection') {
   steps {
-    sh 'npx tsx src/index.ts --test "npm test" --runs 20 > flakiness-report.json'
+    sh 'flaky --test "npm test" --runs 20 > flakiness-report.json'
     archiveArtifacts artifacts: 'flakiness-report.json'
   }
 }
@@ -157,12 +157,12 @@ stage('Flakiness Detection') {
 
 **Use verbose mode for debugging:**
 ```bash
-npx tsx src/index.ts --test "npm test" --runs 10 --verbose
+flaky --test "npm test" --runs 10 --verbose
 ```
 
 **Redirect output to file:**
 ```bash
-npx tsx src/index.ts --test "npm test" > report.json
+flaky --test "npm test" > report.json
 ```
 
 ## See Also

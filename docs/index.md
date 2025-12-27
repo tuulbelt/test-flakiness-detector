@@ -65,7 +65,7 @@ features:
 Detect flaky tests in just one command:
 
 ```bash
-npx tsx src/index.ts --test "npm test" --runs 10
+flaky --test "npm test" --runs 10
 ```
 
 Get a detailed JSON report:
@@ -129,7 +129,7 @@ This tool demonstrates the power of composability by both USING and VALIDATING o
 When running ≥5 iterations, the flakiness detector integrates [CLI Progress Reporting](/tools/cli-progress-reporting/) to show real-time progress updates:
 
 ```bash
-npx tsx src/index.ts --test "npm test" --runs 20 --verbose
+flaky --test "npm test" --runs 20 --verbose
 # [INFO] Progress tracking enabled (dogfooding cli-progress-reporting)
 # [INFO] Run 1/20
 # [INFO] Run 2/20 passed (2 passed, 0 failed)

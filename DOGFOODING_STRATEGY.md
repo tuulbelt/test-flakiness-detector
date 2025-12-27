@@ -112,7 +112,7 @@ echo "   Running $RUNS iterations..."
 echo ""
 
 cd "$TOOL_DIR"
-npx tsx src/index.ts \
+flaky \
   --test "cd '$PATHS_DIR' && npm test 2>&1" \
   --runs "$RUNS" \
   --verbose
@@ -156,7 +156,7 @@ echo "   Running $RUNS iterations (high count for concurrent safety)..."
 echo ""
 
 cd "$TOOL_DIR"
-npx tsx src/index.ts \
+flaky \
   --test "cd '$PROGRESS_DIR' && npm test 2>&1" \
   --runs "$RUNS" \
   --verbose
@@ -220,7 +220,7 @@ run_detection_with_cache() {
     else
       echo "[$id] Cache miss. Running detection..."
       cd "$TOOL_DIR"
-      npx tsx src/index.ts --test "$test_cmd" --runs 5 > "$cache_file"
+      flaky --test "$test_cmd" --runs 5 > "$cache_file"
       cat "$cache_file"
     fi
 

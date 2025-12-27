@@ -9,7 +9,7 @@ Test Flakiness Detector has minimal configuration by design - most settings are 
 **Required.** The test command to execute.
 
 ```bash
-npx tsx src/index.ts --test "npm test"
+flaky --test "npm test"
 ```
 
 ### `--runs <number>`
@@ -17,7 +17,7 @@ npx tsx src/index.ts --test "npm test"
 **Optional.** Number of times to run tests. Default: `10`
 
 ```bash
-npx tsx src/index.ts --test "npm test" --runs 50
+flaky --test "npm test" --runs 50
 ```
 
 **Recommended values:**
@@ -31,7 +31,7 @@ npx tsx src/index.ts --test "npm test" --runs 50
 **Optional.** Enable verbose output. Default: `false`
 
 ```bash
-npx tsx src/index.ts --test "npm test" --verbose
+flaky --test "npm test" --verbose
 ```
 
 Shows real-time output:
@@ -79,7 +79,7 @@ jobs:
       - uses: actions/checkout@v4
       - name: Check for flaky tests
         run: |
-          npx tsx src/index.ts \
+          flaky \
             --test "npm test" \
             --runs ${{ env.TEST_RUNS }}
 ```
@@ -92,7 +92,7 @@ variables:
 
 test:flakiness:
   script:
-    - npx tsx src/index.ts --test "npm test" --runs $FLAKINESS_RUNS
+    - flaky --test "npm test" --runs $FLAKINESS_RUNS
 ```
 
 ## Test Command Configuration
@@ -125,7 +125,7 @@ The `--test` argument can be any shell command:
 Default output is JSON to stdout:
 
 ```bash
-npx tsx src/index.ts --test "npm test" > report.json
+flaky --test "npm test" > report.json
 ```
 
 ### Custom Processing
@@ -134,13 +134,13 @@ Pipe to tools for custom formatting:
 
 ```bash
 # Pretty print
-npx tsx src/index.ts --test "npm test" | jq
+flaky --test "npm test" | jq
 
 # Extract flaky tests
-npx tsx src/index.ts --test "npm test" | jq '.flakyTests[].testName'
+flaky --test "npm test" | jq '.flakyTests[].testName'
 
 # Check if any flaky
-npx tsx src/index.ts --test "npm test" | jq -e '.flakyTests | length > 0'
+flaky --test "npm test" | jq -e '.flakyTests | length > 0'
 ```
 
 ## Performance Tuning
@@ -152,7 +152,7 @@ Tests run **sequentially** by default (one after another). For faster results, r
 ```bash
 # Run 4 instances of 25 runs each (100 total)
 for i in {1..4}; do
-  npx tsx src/index.ts --test "npm test" --runs 25 > report-$i.json &
+  flaky --test "npm test" --runs 25 > report-$i.json &
 done
 wait
 ```
@@ -164,7 +164,7 @@ Then merge results manually.
 If tests hang, use shell timeout:
 
 ```bash
-timeout 5m npx tsx src/index.ts --test "npm test" --runs 100
+timeout 5m flaky --test "npm test" --runs 100
 ```
 
 ## Best Practices
@@ -186,16 +186,16 @@ timeout 5m npx tsx src/index.ts --test "npm test" --runs 100
 
 ```bash
 # When debugging a specific flaky test
-npx tsx src/index.ts --test "npm test" --runs 20 --verbose
+flaky --test "npm test" --runs 20 --verbose
 ```
 
 ### Separate Test Suites
 
 ```bash
 # Check each suite independently
-npx tsx src/index.ts --test "npm run test:unit" --runs 20
-npx tsx src/index.ts --test "npm run test:integration" --runs 30
-npx tsx src/index.ts --test "npm run test:e2e" --runs 10
+flaky --test "npm run test:unit" --runs 20
+flaky --test "npm run test:integration" --runs 30
+flaky --test "npm run test:e2e" --runs 10
 ```
 
 ## See Also

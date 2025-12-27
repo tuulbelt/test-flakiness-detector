@@ -60,7 +60,7 @@ echo ""
 
 # Run flakiness detection
 cd "$TOOL_DIR"
-npx tsx src/index.ts \
+npx flaky \
     --test "cd '$PATHS_DIR' && npm test 2>&1" \
     --runs "$RUNS" \
     --verbose

@@ -52,7 +52,7 @@ validate_tool() {
     echo ""
 
     cd "$TOOL_DIR"
-    if npx tsx src/index.ts --test "$test_cmd" --runs "$RUNS"; then
+    if npx flaky --test "$test_cmd" --runs "$RUNS"; then
         echo ""
         echo "✅ $name: NO FLAKINESS DETECTED"
         ((VALIDATED_TOOLS++))

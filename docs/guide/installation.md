@@ -44,7 +44,7 @@ npm install
 Test that it works:
 
 ```bash
-npx tsx src/index.ts --test "echo 'test passed'" --runs 5
+flaky --test "echo 'test passed'" --runs 5
 ```
 
 You should see JSON output indicating 5 successful runs.

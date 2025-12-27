@@ -49,8 +49,8 @@ if [ ! -d "$DIFF_DIR" ]; then
 
     # Run twice with standard tools
     cd "$TOOL_DIR"
-    npx tsx src/index.ts --test "$TEST_CMD" --runs 1 > "$TEMP_DIR/run1.txt" 2>&1 || true
-    npx tsx src/index.ts --test "$TEST_CMD" --runs 1 > "$TEMP_DIR/run2.txt" 2>&1 || true
+    npx flaky --test "$TEST_CMD" --runs 1 > "$TEMP_DIR/run1.txt" 2>&1 || true
+    npx flaky --test "$TEST_CMD" --runs 1 > "$TEMP_DIR/run2.txt" 2>&1 || true
 
     echo "📊 Differences between runs:"
     diff "$TEMP_DIR/run1.txt" "$TEMP_DIR/run2.txt" || echo "(No differences - tests are deterministic!)"
@@ -76,12 +76,12 @@ echo ""
 # Run 1
 echo "  [Run 1/2] Executing test command..."
 cd "$TOOL_DIR"
-npx tsx src/index.ts --test "$TEST_CMD" --runs 1 > "$TEMP_DIR/run1.txt" 2>&1 || true
+npx flaky --test "$TEST_CMD" --runs 1 > "$TEMP_DIR/run1.txt" 2>&1 || true
 echo "  ✓ Run 1 complete"
 
 # Run 2
 echo "  [Run 2/2] Executing test command..."
-npx tsx src/index.ts --test "$TEST_CMD" --runs 1 > "$TEMP_DIR/run2.txt" 2>&1 || true
+npx flaky --test "$TEST_CMD" --runs 1 > "$TEMP_DIR/run2.txt" 2>&1 || true
 echo "  ✓ Run 2 complete"
 echo ""
 

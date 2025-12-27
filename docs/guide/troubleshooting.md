@@ -62,7 +62,7 @@ import { detectFlakiness } from './src/index.js';
 npm test  # Does this work?
 
 # Then use it
-npx tsx src/index.ts --test "npm test"
+flaky --test "npm test"
 ```
 
 ### Tests Timeout
@@ -73,7 +73,7 @@ npx tsx src/index.ts --test "npm test"
 
 **Solution:** Add shell timeout:
 ```bash
-timeout 5m npx tsx src/index.ts --test "npm test" --runs 10
+timeout 5m flaky --test "npm test" --runs 10
 ```
 
 ### Wrong Tests Running
@@ -85,8 +85,8 @@ timeout 5m npx tsx src/index.ts --test "npm test" --runs 10
 **Solution:** Be explicit:
 ```bash
 # Specify exact test file/pattern
-npx tsx src/index.ts --test "npm run test:unit"
-npx tsx src/index.ts --test "jest tests/integration"
+flaky --test "npm run test:unit"
+flaky --test "jest tests/integration"
 ```
 
 ## Output Issues
@@ -100,10 +100,10 @@ npx tsx src/index.ts --test "jest tests/integration"
 **Solution:**
 ```bash
 # Ensure stdout is JSON
-npx tsx src/index.ts --test "npm test" > report.json
+flaky --test "npm test" > report.json
 
 # Don't use --verbose if you need JSON
-npx tsx src/index.ts --test "npm test" --runs 10  # Not: --verbose
+flaky --test "npm test" --runs 10  # Not: --verbose
 ```
 
 ### "Cannot parse JSON"
@@ -115,7 +115,7 @@ npx tsx src/index.ts --test "npm test" --runs 10  # Not: --verbose
 **Solution:** Suppress test output:
 ```bash
 # Redirect test stderr
-npx tsx src/index.ts --test "npm test 2>/dev/null"
+flaky --test "npm test 2>/dev/null"
 ```
 
 ## Performance Issues
@@ -129,11 +129,11 @@ npx tsx src/index.ts --test "npm test 2>/dev/null"
 **Solution:** Reduce runs or parallelize:
 ```bash
 # Reduce runs
-npx tsx src/index.ts --test "npm test" --runs 10  # Instead of 100
+flaky --test "npm test" --runs 10  # Instead of 100
 
 # Or run in parallel (manual merge)
 for i in {1..4}; do
-  npx tsx src/index.ts --test "npm test" --runs 25 > report-$i.json &
+  flaky --test "npm test" --runs 25 > report-$i.json &
 done
 wait
 ```
@@ -147,10 +147,10 @@ wait
 **Solution:**
 ```bash
 # Increase Node memory
-NODE_OPTIONS=--max-old-space-size=4096 npx tsx src/index.ts --test "npm test"
+NODE_OPTIONS=--max-old-space-size=4096 flaky --test "npm test"
 
 # Or reduce runs
-npx tsx src/index.ts --test "npm test" --runs 10
+flaky --test "npm test" --runs 10
 ```
 
 ## CI/CD Issues
@@ -164,7 +164,7 @@ npx tsx src/index.ts --test "npm test" --runs 10
 **Solution:**
 ```yaml
 # Limit runs in CI
-- run: npx tsx src/index.ts --test "npm test" --runs 20  # Not 500
+- run: flaky --test "npm test" --runs 20  # Not 500
   timeout-minutes: 30
 ```
 
@@ -204,7 +204,7 @@ for i in {1..5}; do npm test; done
 **Solution:** Increase runs:
 ```bash
 # If test fails 1% of time, need 100+ runs
-npx tsx src/index.ts --test "npm test" --runs 200
+flaky --test "npm test" --runs 200
 ```
 
 ## Platform-Specific Issues
@@ -218,10 +218,10 @@ npx tsx src/index.ts --test "npm test" --runs 200
 **Solution:** Use cross-platform commands:
 ```bash
 # Instead of bash-specific
-npx tsx src/index.ts --test "npm test"  # Works everywhere
+flaky --test "npm test"  # Works everywhere
 
 # Not
-npx tsx src/index.ts --test "bash run-tests.sh"  # Unix only
+flaky --test "bash run-tests.sh"  # Unix only
 ```
 
 ### macOS: "Operation not permitted"
@@ -234,7 +234,7 @@ npx tsx src/index.ts --test "bash run-tests.sh"  # Unix only
 ```bash
 # Grant terminal full disk access in System Preferences
 # Or run with sudo (not recommended)
-sudo npx tsx src/index.ts --test "npm test"
+sudo flaky --test "npm test"
 ```
 
 ## Debugging
@@ -243,7 +243,7 @@ sudo npx tsx src/index.ts --test "npm test"
 
 See what's happening:
 ```bash
-npx tsx src/index.ts --test "npm test" --runs 5 --verbose
+flaky --test "npm test" --runs 5 --verbose
 ```
 
 Output:
@@ -257,7 +257,7 @@ Run 2/5: ❌ Failed (exit code: 1)
 
 Inspect the report:
 ```bash
-npx tsx src/index.ts --test "npm test" --runs 5 | jq '.runs[]'
+flaky --test "npm test" --runs 5 | jq '.runs[]'
 ```
 
 ### Test Command Directly
@@ -275,7 +275,7 @@ echo $?  # Should be 0 for pass, non-zero for fail
 
 1. **Check Node version:** `node --version` (need 18+)
 2. **Reinstall dependencies:** `rm -rf node_modules && npm install`
-3. **Try minimal example:** `npx tsx src/index.ts --test "echo test" --runs 3`
+3. **Try minimal example:** `flaky --test "echo test" --runs 3`
 4. **Check GitHub issues:** [Report a bug](https://github.com/tuulbelt/tuulbelt/issues)
 
 ## See Also

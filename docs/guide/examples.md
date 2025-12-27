@@ -7,19 +7,19 @@ Real-world examples of using Test Flakiness Detector.
 ### Detect Flaky npm Tests
 
 ```bash
-npx tsx src/index.ts --test "npm test" --runs 10
+flaky --test "npm test" --runs 10
 ```
 
 ### Detect Flaky Pytest Tests
 
 ```bash
-npx tsx src/index.ts --test "pytest tests/" --runs 20
+flaky --test "pytest tests/" --runs 20
 ```
 
 ### Detect Flaky Jest Tests
 
 ```bash
-npx tsx src/index.ts --test "npm run test:unit" --runs 15 --verbose
+flaky --test "npm run test:unit" --runs 15 --verbose
 ```
 
 ## Example Outputs
@@ -91,7 +91,7 @@ if (report.flakyTests.length > 0) {
 # GitHub Actions example
 - name: Check for flaky tests
   run: |
-    npx tsx src/index.ts --test "npm test" --runs 20 > flakiness-report.json
+    flaky --test "npm test" --runs 20 > flakiness-report.json
 
 - name: Upload report
   uses: actions/upload-artifact@v3
@@ -106,19 +106,19 @@ if (report.flakyTests.length > 0) {
 
 ```bash
 # Check unit tests
-npx tsx src/index.ts --test "npm run test:unit" --runs 10
+flaky --test "npm run test:unit" --runs 10
 
 # Check integration tests
-npx tsx src/index.ts --test "npm run test:integration" --runs 20
+flaky --test "npm run test:integration" --runs 20
 
 # Check end-to-end tests
-npx tsx src/index.ts --test "npm run test:e2e" --runs 5
+flaky --test "npm run test:e2e" --runs 5
 ```
 
 ### Verbose Mode
 
 ```bash
-npx tsx src/index.ts --test "npm test" --runs 10 --verbose
+flaky --test "npm test" --runs 10 --verbose
 ```
 
 Output shows each run in real-time:

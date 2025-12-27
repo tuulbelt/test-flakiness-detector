@@ -7,7 +7,7 @@ Guidelines for effectively detecting and fixing flaky tests.
 ### Start Small
 ```bash
 # Quick check - good for frequently flaky tests
-npx tsx src/index.ts --test "npm test" --runs 10
+flaky --test "npm test" --runs 10
 ```
 
 If you find flaky tests, you're done. If not:
@@ -15,10 +15,10 @@ If you find flaky tests, you're done. If not:
 ### Increase Gradually
 ```bash
 # Medium check - catches moderately flaky tests
-npx tsx src/index.ts --test "npm test" --runs 30
+flaky --test "npm test" --runs 30
 
 # Thorough check - catches rarely flaky tests
-npx tsx src/index.ts --test "npm test" --runs 100
+flaky --test "npm test" --runs 100
 ```
 
 ### Rule of Thumb
@@ -39,7 +39,7 @@ Catch flaky tests before they hit main:
 ```yaml
 # .github/workflows/pr-checks.yml
 - name: Check for flaky tests
-  run: npx tsx src/index.ts --test "npm test" --runs 20
+  run: flaky --test "npm test" --runs 20
 ```
 
 ### ✅ After Refactoring
@@ -48,7 +48,7 @@ Major changes can introduce flakiness:
 
 ```bash
 # After changing test setup/teardown
-npx tsx src/index.ts --test "npm test" --runs 50
+flaky --test "npm test" --runs 50
 ```
 
 ### ✅ On Schedule
@@ -247,7 +247,7 @@ cy.get('[data-testid="submit-button"]').click();
 ```yaml
 - name: Flakiness check
   run: |
-    npx tsx src/index.ts --test "npm test" --runs 20 > report.json
+    flaky --test "npm test" --runs 20 > report.json
 
     # Fail if any flaky tests found
     FLAKY_COUNT=$(jq '.flakyTests | length' report.json)
@@ -266,7 +266,7 @@ schedule:
 jobs:
   weekly-flakiness:
     steps:
-      - run: npx tsx src/index.ts --test "npm test" --runs 100
+      - run: flaky --test "npm test" --runs 100
       - uses: actions/upload-artifact@v3
         with:
           name: flakiness-report
@@ -280,7 +280,7 @@ jobs:
 ```bash
 # Add timestamp to reports
 DATE=$(date +%Y-%m-%d)
-npx tsx src/index.ts --test "npm test" --runs 50 > "reports/$DATE.json"
+flaky --test "npm test" --runs 50 > "reports/$DATE.json"
 ```
 
 ### Alert on New Flakiness

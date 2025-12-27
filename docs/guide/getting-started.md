@@ -13,7 +13,7 @@ npm install
 Run your test command 10 times:
 
 ```bash
-npx tsx src/index.ts --test "npm test"
+flaky --test "npm test"
 ```
 
 ## CLI Options
@@ -27,13 +27,13 @@ npx tsx src/index.ts --test "npm test"
 
 ```bash
 # Detect flaky npm tests
-npx tsx src/index.ts --test "npm test" --runs 20
+flaky --test "npm test" --runs 20
 
 # Detect flaky Rust tests
-npx tsx src/index.ts --test "cargo test" --runs 15
+flaky --test "cargo test" --runs 15
 
 # Verbose mode
-npx tsx src/index.ts --test "npm test" --verbose
+flaky --test "npm test" --verbose
 ```
 
 ## Understanding Results

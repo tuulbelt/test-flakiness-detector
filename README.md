@@ -1,4 +1,4 @@
-# Test Flakiness Detector
+# Test Flakiness Detector / `flaky`
 
 [![Tests](https://github.com/tuulbelt/tuulbelt/actions/workflows/test-all-tools.yml/badge.svg)](https://github.com/tuulbelt/tuulbelt/actions/workflows/test-all-tools.yml)
 [![Tool Tests](https://github.com/tuulbelt/tuulbelt/workflows/Test%20All%20Tools/badge.svg?branch=main)](https://github.com/tuulbelt/tuulbelt/actions)
@@ -45,16 +45,16 @@ No runtime dependencies — this tool uses only Node.js standard library.
 
 ```bash
 # Run npm test 10 times (default)
-npx tsx src/index.ts --test "npm test"
+flaky --test "npm test"
 
 # Run with 20 iterations
-npx tsx src/index.ts --test "npm test" --runs 20
+flaky --test "npm test" --runs 20
 
 # Run cargo tests with verbose output
-npx tsx src/index.ts --test "cargo test" --runs 15 --verbose
+flaky --test "cargo test" --runs 15 --verbose
 
 # Show help
-npx tsx src/index.ts --help
+flaky --help
 ```
 
 ### As a Library
@@ -135,25 +135,25 @@ The tool outputs a JSON report with the following structure:
 ### Detect Flaky npm Tests
 
 ```bash
-npx tsx src/index.ts --test "npm test" --runs 20
+flaky --test "npm test" --runs 20
 ```
 
 ### Detect Flaky Rust Tests
 
 ```bash
-npx tsx src/index.ts --test "cargo test" --runs 15
+flaky --test "cargo test" --runs 15
 ```
 
 ### Detect Flaky Python Tests
 
 ```bash
-npx tsx src/index.ts --test "pytest tests/" --runs 10
+flaky --test "pytest tests/" --runs 10
 ```
 
 ### With Verbose Output
 
 ```bash
-npx tsx src/index.ts --test "npm test" --runs 5 --verbose
+flaky --test "npm test" --runs 5 --verbose
 ```
 
 This will show:
@@ -175,7 +175,7 @@ See what to expect from the tool with these real examples:
 <summary>📊 Example 1: All Tests Passing (click to expand)</summary>
 
 ```bash
-npx tsx src/index.ts --test "echo 'test passed'" --runs 5
+flaky --test "echo 'test passed'" --runs 5
 ```
 
 ```json
@@ -205,7 +205,7 @@ npx tsx src/index.ts --test "echo 'test passed'" --runs 5
 <summary>📊 Example 2: All Tests Failing (click to expand)</summary>
 
 ```bash
-npx tsx src/index.ts --test "exit 1" --runs 3
+flaky --test "exit 1" --runs 3
 ```
 
 ```json
@@ -235,7 +235,7 @@ npx tsx src/index.ts --test "exit 1" --runs 3
 <summary>🔴 Example 3: Flaky Tests Detected (click to expand)</summary>
 
 ```bash
-npx tsx src/index.ts --test 'node -e "process.exit(Math.random() > 0.5 ? 0 : 1)"' --runs 20
+flaky --test 'node -e "process.exit(Math.random() > 0.5 ? 0 : 1)"' --runs 20
 ```
 
 ```json
@@ -268,7 +268,7 @@ npx tsx src/index.ts --test 'node -e "process.exit(Math.random() > 0.5 ? 0 : 1)"
 <summary>💬 Example 4: Verbose Mode Output (click to expand)</summary>
 
 ```bash
-npx tsx src/index.ts --test "echo 'test'" --runs 3 --verbose
+flaky --test "echo 'test'" --runs 3 --verbose
 ```
 
 ```
@@ -305,7 +305,7 @@ npx tsx src/index.ts --test "echo 'test'" --runs 3 --verbose
 git clone https://github.com/tuulbelt/tuulbelt.git
 cd tuulbelt/test-flakiness-detector
 npm install
-npx tsx src/index.ts --test "npm test" --runs 10
+flaky --test "npm test" --runs 10
 ```
 
 ### One-Click Playground
@@ -362,7 +362,7 @@ This tool demonstrates the power of composability by both USING and VALIDATING o
 #### 1. Uses CLI Progress Reporting (Library Integration)
 
 ```bash
-npx tsx src/index.ts --test "npm test" --runs 10 --verbose
+flaky --test "npm test" --runs 10 --verbose
 # [INFO] Progress tracking enabled (dogfooding cli-progress-reporting)
 # [INFO] Run 1/10
 # [INFO] Run 2/10
