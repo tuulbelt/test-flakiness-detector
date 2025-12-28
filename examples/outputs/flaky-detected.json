@@ -1,15 +1,15 @@
 {
   "success": true,
   "totalRuns": 20,
-  "passedRuns": 10,
-  "failedRuns": 10,
+  "passedRuns": 12,
+  "failedRuns": 8,
   "flakyTests": [
     {
       "testName": "Test Suite",
-      "passed": 10,
-      "failed": 10,
+      "passed": 12,
+      "failed": 8,
       "totalRuns": 20,
-      "failureRate": 50
+      "failureRate": 40
     }
   ],
   "runs": [
@@ -20,60 +20,6 @@
       "stderr": ""
     },
     {
-      "success": false,
-      "exitCode": 1,
-      "stdout": "",
-      "stderr": ""
-    },
-    {
-      "success": false,
-      "exitCode": 1,
-      "stdout": "",
-      "stderr": ""
-    },
-    {
-      "success": true,
-      "exitCode": 0,
-      "stdout": "",
-      "stderr": ""
-    },
-    {
-      "success": true,
-      "exitCode": 0,
-      "stdout": "",
-      "stderr": ""
-    },
-    {
-      "success": false,
-      "exitCode": 1,
-      "stdout": "",
-      "stderr": ""
-    },
-    {
-      "success": false,
-      "exitCode": 1,
-      "stdout": "",
-      "stderr": ""
-    },
-    {
-      "success": true,
-      "exitCode": 0,
-      "stdout": "",
-      "stderr": ""
-    },
-    {
-      "success": false,
-      "exitCode": 1,
-      "stdout": "",
-      "stderr": ""
-    },
-    {
-      "success": false,
-      "exitCode": 1,
-      "stdout": "",
-      "stderr": ""
-    },
-    {
       "success": true,
       "exitCode": 0,
       "stdout": "",
@@ -110,6 +56,54 @@
       "stderr": ""
     },
     {
+      "success": false,
+      "exitCode": 1,
+      "stdout": "",
+      "stderr": ""
+    },
+    {
+      "success": false,
+      "exitCode": 1,
+      "stdout": "",
+      "stderr": ""
+    },
+    {
+      "success": false,
+      "exitCode": 1,
+      "stdout": "",
+      "stderr": ""
+    },
+    {
+      "success": false,
+      "exitCode": 1,
+      "stdout": "",
+      "stderr": ""
+    },
+    {
+      "success": true,
+      "exitCode": 0,
+      "stdout": "",
+      "stderr": ""
+    },
+    {
+      "success": true,
+      "exitCode": 0,
+      "stdout": "",
+      "stderr": ""
+    },
+    {
+      "success": true,
+      "exitCode": 0,
+      "stdout": "",
+      "stderr": ""
+    },
+    {
+      "success": true,
+      "exitCode": 0,
+      "stdout": "",
+      "stderr": ""
+    },
+    {
       "success": true,
       "exitCode": 0,
       "stdout": "",
@@ -118,6 +112,12 @@
     {
       "success": false,
       "exitCode": 1,
+      "stdout": "",
+      "stderr": ""
+    },
+    {
+      "success": true,
+      "exitCode": 0,
       "stdout": "",
       "stderr": ""
     },
