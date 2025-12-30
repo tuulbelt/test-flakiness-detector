@@ -4,12 +4,13 @@
  *
  * Detect unreliable tests by running them multiple times and tracking failure rates.
  *
- * Dogfooding: Uses cli-progress-reporting for progress tracking (when available in monorepo).
+ * Dogfooding: Uses cli-progress-reporting for progress tracking.
  */
 
 import { spawnSync } from 'child_process';
 import { existsSync, realpathSync } from 'node:fs';
 import { join } from 'node:path';
+import * as progress from '@tuulbelt/cli-progress-reporting';
 
 /**
  * Configuration options for flakiness detection
@@ -73,24 +74,6 @@ export interface FlakinessReport {
   error?: string;
 }
 
-/**
- * Try to load cli-progress-reporting (dogfooding - optional in monorepo)
- * Returns null if not available (e.g., tool cloned independently)
- */
-async function loadProgressReporting(): Promise<any | null> {
-  try {
-    // Try to import from sibling directory (monorepo context)
-    const progressPath = join(process.cwd(), '..', 'cli-progress-reporting', 'src', 'index.ts');
-    if (!existsSync(progressPath)) {
-      return null; // Not in monorepo, that's fine
-    }
-
-    const module = await import(`file://${progressPath}`);
-    return module;
-  } catch {
-    return null; // Import failed, that's fine - progress reporting is optional
-  }
-}
 
 /**
  * Run a test command once and capture the result
@@ -178,11 +161,10 @@ export async function detectFlakiness(config: Config): Promise<FlakinessReport> 
     };
   }
 
-  // Try to load progress reporting (dogfooding - optional)
-  const progress = await loadProgressReporting();
+  // Initialize progress reporting (dogfooding cli-progress-reporting)
   const progressId = `flakiness-${Date.now()}`;
 
-  if (progress && runs >= 5) {
+  if (runs >= 5) {
     // Only use progress reporting for 5+ runs (makes sense for longer operations)
     const initResult = progress.init(runs, 'Detecting flakiness...', { id: progressId });
     if (initResult.ok && verbose) {
@@ -214,7 +196,7 @@ export async function detectFlakiness(config: Config): Promise<FlakinessReport> 
     }
 
     // Update progress after each run
-    if (progress && runs >= 5) {
+    if (runs >= 5) {
       const status = result.success ? 'passed' : 'failed';
       progress.increment(1, `Run ${i + 1}/${runs} ${status} (${passedRuns} passed, ${failedRuns} failed)`, { id: progressId });
     }
@@ -235,7 +217,7 @@ export async function detectFlakiness(config: Config): Promise<FlakinessReport> 
   }
 
   // Mark progress as complete
-  if (progress && runs >= 5) {
+  if (runs >= 5) {
     const summary = flakyTests.length > 0
       ? `Flakiness detected: ${flakyTests[0]!.failureRate.toFixed(1)}% failure rate`
       : 'No flakiness detected';
@@ -250,7 +232,7 @@ export async function detectFlakiness(config: Config): Promise<FlakinessReport> 
   }
 
   // Clean up progress file
-  if (progress && runs >= 5) {
+  if (runs >= 5) {
     progress.clear({ id: progressId });
   }
 

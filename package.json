@@ -38,6 +38,9 @@
   "engines": {
     "node": ">=18.0.0"
   },
+  "dependencies": {
+    "@tuulbelt/cli-progress-reporting": "git+https://github.com/tuulbelt/cli-progress-reporting.git"
+  },
   "devDependencies": {
     "@types/node": "^20.19.27",
     "tsx": "^4.7.0",

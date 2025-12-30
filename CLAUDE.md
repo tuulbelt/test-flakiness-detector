@@ -26,23 +26,24 @@ npm run test:fuzzy      # Fuzzy input tests
 
 ## Code Conventions
 
-- Zero external dependencies (Tuulbelt tools allowed)
+- Zero external dependencies (except Tuulbelt tool composition)
 - Result pattern for error handling
 - 80%+ test coverage
 - ES modules with `node:` prefix for built-ins
 - See main repo for full [PRINCIPLES.md](https://github.com/tuulbelt/tuulbelt/blob/main/PRINCIPLES.md)
 
-## Dogfooding: CLI Progress Integration (Optional)
+## Dependencies
 
-This tool uses [CLI Progress Reporting](https://github.com/tuulbelt/cli-progress-reporting) for progress tracking when running in monorepo context.
+This tool uses [CLI Progress Reporting](https://github.com/tuulbelt/cli-progress-reporting) as a **required dependency** for progress tracking.
 
-**Design Decision:** The cli-progress dependency is OPTIONAL with graceful fallback:
-- **Monorepo:** Dynamic import from sibling directory (dogfooding demonstration)
-- **Standalone:** Falls back to no progress tracking (zero-dep preserved)
+**Design Decision:** The cli-progress dependency is REQUIRED (Tuulbelt tool composition - PRINCIPLES.md Exception 2):
+- Listed in package.json `dependencies` as git URL
+- Fetched automatically during `npm install`
+- Shows real-time progress for runs ≥ 5
 
-**Implementation:** See `src/index.ts` lines 77-90 for dynamic import pattern with graceful fallback.
+**Implementation:** See `src/index.ts` line 13 for import and lines 164-173 for usage.
 
-**Why Optional:** This aligns with Tuulbelt's zero-dependency principle while demonstrating tool composition in monorepo workflows.
+**Why Required:** This demonstrates Tuulbelt-to-Tuulbelt composition. Since all Tuulbelt tools have zero external dependencies, composing them preserves the zero-dep guarantee while providing richer functionality.
 
 ## Testing
 
