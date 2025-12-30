@@ -1,12 +1,13 @@
 # Test Flakiness Detector / `flaky`
 
-[![Tests](https://github.com/tuulbelt/tuulbelt/actions/workflows/test-all-tools.yml/badge.svg)](https://github.com/tuulbelt/tuulbelt/actions/workflows/test-all-tools.yml)
-[![Tool Tests](https://github.com/tuulbelt/tuulbelt/workflows/Test%20All%20Tools/badge.svg?branch=main)](https://github.com/tuulbelt/tuulbelt/actions)
+[![Tests](https://github.com/tuulbelt/test-flakiness-detector/actions/workflows/test.yml/badge.svg)](https://github.com/tuulbelt/test-flakiness-detector/actions/workflows/test.yml)
 ![Version](https://img.shields.io/badge/version-0.1.0-blue)
 ![Node](https://img.shields.io/badge/node-%3E%3D18.0.0-brightgreen)
-![Zero Dependencies](https://img.shields.io/badge/dependencies-0-success)
-![Tests](https://img.shields.io/badge/tests-125%2B%20passing-success)
+![Dogfooded](https://img.shields.io/badge/dogfooded-🐕-purple)
+![Tests](https://img.shields.io/badge/tests-132%2B%20passing-success)
 [![License](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
+
+**Part of [Tuulbelt](https://github.com/tuulbelt/tuulbelt)** — A collection of focused, zero-dependency tools
 
 Detect unreliable tests by running them multiple times and tracking failure rates.
 
@@ -32,8 +33,8 @@ This tool runs your test command multiple times and identifies which tests have 
 Clone the repository:
 
 ```bash
-git clone https://github.com/tuulbelt/tuulbelt.git
-cd tuulbelt/test-flakiness-detector
+git clone https://github.com/tuulbelt/test-flakiness-detector.git
+cd test-flakiness-detector
 npm install  # Install dev dependencies only
 ```
 
@@ -320,7 +321,7 @@ flaky --test "npm test" --runs 10
 
 ### One-Click Playground
 
-[![Open in StackBlitz](https://developer.stackblitz.com/img/open_in_stackblitz.svg)](https://stackblitz.com/github/tuulbelt/tuulbelt/tree/main/test-flakiness-detector)
+[![Open in StackBlitz](https://developer.stackblitz.com/img/open_in_stackblitz.svg)](https://stackblitz.com/github/tuulbelt/test-flakiness-detector)
 
 Try the tool instantly in your browser without installing anything!
 
@@ -495,7 +496,7 @@ See [SPEC.md](SPEC.md) for detailed technical specification.
 
 **[▶ View interactive recording on asciinema.org](https://asciinema.org/a/Ocnv8bTWXBo5ZYoOppDUWHZw8)**
 
-> Try it online: [![Open in StackBlitz](https://developer.stackblitz.com/img/open_in_stackblitz.svg)](https://stackblitz.com/github/tuulbelt/tuulbelt/tree/main/test-flakiness-detector)
+> Try it online: [![Open in StackBlitz](https://developer.stackblitz.com/img/open_in_stackblitz.svg)](https://stackblitz.com/github/tuulbelt/test-flakiness-detector)
 
 ## License
 
@@ -503,10 +504,10 @@ MIT — see [LICENSE](LICENSE)
 
 ## Contributing
 
-See [CONTRIBUTING.md](../CONTRIBUTING.md) for contribution guidelines.
+See [CONTRIBUTING.md](https://github.com/tuulbelt/tuulbelt/blob/main/CONTRIBUTING.md) for contribution guidelines.
 
 ## Related Tools
 
 Part of the [Tuulbelt](https://github.com/tuulbelt/tuulbelt) collection:
-- [CLI Progress Reporting](../cli-progress-reporting/) — Concurrent-safe progress updates
+- [CLI Progress Reporting](https://github.com/tuulbelt/cli-progress-reporting) — Concurrent-safe progress updates
 - More tools coming soon...
