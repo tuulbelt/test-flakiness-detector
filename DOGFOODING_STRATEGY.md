@@ -8,7 +8,7 @@ This document outlines how the Test Flakiness Detector leverages other Tuulbelt 
 
 ## Identified Dogfooding Opportunities
 
-### 1. CLI Progress Reporting (TypeScript library integration)
+### 1. CLI Progress Reporting (TypeScript library integration) - REQUIRED DEPENDENCY
 
 **Use Case:** Show real-time progress during long-running flakiness detection
 
@@ -19,20 +19,24 @@ This document outlines how the Test Flakiness Detector leverages other Tuulbelt 
 
 **Implementation:**
 ```typescript
-// Already integrated! See src/index.ts
-import { loadOptionalProgressReporter } from './progress.js';
+// Already integrated! See src/index.ts line 13
+import * as progress from '@tuulbelt/cli-progress-reporting';
 
-const progress = await loadOptionalProgressReporter();
-if (progress) {
-  await progress.init({ total: runs, message: 'Running flakiness detection' });
-  for (let i = 0; i < runs; i++) {
-    await progress.set({ current: i + 1, message: `Run ${i + 1}/${runs}` });
+// Progress is REQUIRED (Tuulbelt tool composition - PRINCIPLES.md Exception 2)
+if (runs >= 5) {
+  const initResult = progress.init(runs, 'Detecting flakiness...', { id: progressId });
+  if (initResult.ok && verbose) {
+    console.error(`[INFO] Progress tracking enabled (dogfooding cli-progress-reporting)`);
   }
-  await progress.finish({ message: 'Detection complete' });
 }
 ```
 
-**Status:** ✅ Already implemented (direct library integration with graceful fallback)
+**Dependency Type:** REQUIRED (git URL in package.json dependencies)
+- Fetched automatically during `npm install`
+- Listed in `package.json` dependencies: `"@tuulbelt/cli-progress-reporting": "git+https://github.com/tuulbelt/cli-progress-reporting.git"`
+- Shows progress for runs ≥ 5
+
+**Status:** ✅ Implemented as REQUIRED dependency (Tuulbelt-to-Tuulbelt composition)
 
 ---
 
@@ -292,14 +296,13 @@ echo "✅ All Phase 1 tools validated for flakiness!"
 
 ## Implementation Checklist
 
-- [x] ~~Integrate CLI Progress Reporting for real-time updates~~ → Already integrated in `src/progress.ts`
+- [x] ~~Integrate CLI Progress Reporting for real-time updates~~ → REQUIRED dependency in `src/index.ts` line 13
 - [ ] Add `scripts/dogfood-diff.sh` for comparing test outputs
 - [ ] Add `scripts/dogfood-paths.sh` for validating Path Normalizer
 - [ ] Add `scripts/dogfood-progress.sh` for validating Progress Reporting (bidirectional)
 - [ ] Add `scripts/dogfood-semaphore.sh` for concurrent detection demo
 - [ ] Add `scripts/dogfood-pipeline.sh` for validating all Phase 1 tools
 - [ ] Document all compositions in README
-- [ ] Test graceful fallback when tools not available (standalone mode)
 
 ---
 
@@ -318,10 +321,10 @@ echo "✅ All Phase 1 tools validated for flakiness!"
    - Validates entire Phase 1 tool suite
 
 3. **Validates Tuulbelt Philosophy**
-   - Zero dependencies (graceful fallback)
+   - Zero external dependencies (required Tuulbelt dependency demonstrates tool composition)
    - Portable interfaces (CLI + library)
    - Single problem per tool (each focused)
-   - Independently cloneable (works standalone)
+   - Independently cloneable (works standalone with git URL dependency auto-fetch)
 
 ---
 

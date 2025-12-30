@@ -51,10 +51,13 @@ You should see JSON output indicating 5 successful runs.
 
 ## What Gets Installed
 
-**Zero runtime dependencies** - only dev dependencies for TypeScript:
+**Dependencies:**
 
 ```json
 {
+  "dependencies": {
+    "@tuulbelt/cli-progress-reporting": "git+https://github.com/tuulbelt/cli-progress-reporting.git"
+  },
   "devDependencies": {
     "@types/node": "^20.x",
     "tsx": "^4.x",
@@ -62,6 +65,8 @@ You should see JSON output indicating 5 successful runs.
   }
 }
 ```
+
+**Zero external dependencies** - uses cli-progress-reporting (Tuulbelt tool composition per PRINCIPLES.md Exception 2).
 
 These are only needed for:
 - Running with `tsx` (TypeScript execution)

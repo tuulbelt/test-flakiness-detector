@@ -19,13 +19,14 @@ This tool runs your test command multiple times and identifies which tests have 
 
 ## Features
 
-- Zero runtime dependencies
+- **Zero external dependencies** — Uses cli-progress-reporting (Tuulbelt tool composition)
 - Works with Node.js 18+
 - TypeScript support with strict mode
 - Composable via CLI or library API
 - Works with any test command (npm test, cargo test, pytest, etc.)
 - Configurable number of test runs
 - Detailed JSON output with failure statistics
+- **Real-time progress tracking** for runs ≥ 5
 - Verbose mode for debugging
 
 ## Installation
@@ -48,7 +49,7 @@ npm link  # Enable the 'flaky' command globally
 flaky --help
 ```
 
-No runtime dependencies — this tool uses only Node.js standard library.
+**Dependencies:** Uses [cli-progress-reporting](https://github.com/tuulbelt/cli-progress-reporting) for progress tracking (automatically fetched from GitHub during `npm install`). Zero external dependencies per PRINCIPLES.md Exception 2.
 
 ## Usage
 
@@ -343,7 +344,10 @@ Try the tool instantly in your browser without installing anything!
 5. Calculate flakiness: if passedRuns > 0 AND failedRuns > 0, tests are flaky
 6. Generate comprehensive JSON report with all run results and statistics
 
-**No external dependencies** — Uses only Node.js `child_process` module for command execution.
+**Dependencies:**
+- **Node.js standard library** — Uses `child_process` module for command execution
+- **cli-progress-reporting** — Tuulbelt tool for real-time progress tracking (PRINCIPLES.md Exception 2)
+- Zero external dependencies
 
 **Key Design Choices:**
 - **Synchronous execution**: Tests run sequentially to avoid false flakiness from resource contention
@@ -387,11 +391,11 @@ flaky --test "npm test" --runs 10 --verbose
 # ...
 ```
 
-The flakiness detector integrates **cli-progress-reporting** to show real-time progress during detection (≥5 runs). This provides:
-- Live run counts and pass/fail status
+The flakiness detector **requires** [cli-progress-reporting](https://github.com/tuulbelt/cli-progress-reporting) as a dependency (automatically fetched from GitHub). This demonstrates Tuulbelt-to-Tuulbelt composition (PRINCIPLES.md Exception 2) and provides:
+- Live run counts and pass/fail status during detection (≥5 runs)
 - Better UX for long detection runs (50-100 iterations)
 - Real-world validation of the progress reporting tool
-- Graceful fallback when cloned standalone
+- Proof that Tuulbelt tools compose naturally while preserving zero external dependencies
 
 #### 2. High-Value Composition Scripts
 

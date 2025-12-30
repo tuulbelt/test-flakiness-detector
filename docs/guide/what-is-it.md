@@ -1,6 +1,6 @@
 # What is Test Flakiness Detector?
 
-Test Flakiness Detector is a zero-dependency tool that identifies unreliable tests by running them multiple times and tracking their failure rates.
+Test Flakiness Detector is a tool with zero external dependencies that identifies unreliable tests by running them multiple times and tracking their failure rates.
 
 ## The Problem
 
@@ -22,8 +22,8 @@ This tool:
 
 ## Why Use This Tool?
 
-### Zero Dependencies
-No external packages. Just Node.js standard library. Install once, works forever.
+### Zero External Dependencies
+Uses [cli-progress-reporting](https://github.com/tuulbelt/cli-progress-reporting) (Tuulbelt tool). No external npm packages. Install once, works forever.
 
 ### Framework Agnostic
 Works with **any test framework**:

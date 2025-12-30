@@ -22,7 +22,7 @@ This tool addresses these gaps by automating the detection process.
 
 ## Design Goals
 
-1. **Zero dependencies** — Uses only Node.js standard library (child_process, etc.)
+1. **Zero external dependencies** — Uses only Node.js standard library and cli-progress-reporting (Tuulbelt tool composition - PRINCIPLES.md Exception 2)
 2. **Type safe** — Full TypeScript support with strict mode
 3. **Composable** — Works as both library and CLI
 4. **Test-framework agnostic** — Works with any test command (npm test, cargo test, pytest, etc.)
@@ -367,12 +367,13 @@ Potential improvements (without breaking changes):
 
 ## Changelog
 
-### v0.1.0 - 2025-12-23
+### v0.1.0 - 2025-12-29
 
 - Initial release
 - Test command execution with configurable runs
 - Suite-level flakiness detection
 - JSON report generation
 - CLI and library interfaces
-- Comprehensive test suite (34 tests)
-- Zero runtime dependencies
+- Comprehensive test suite (132 tests)
+- **Required dependency**: cli-progress-reporting for progress tracking (Tuulbelt tool composition)
+- Zero external runtime dependencies

@@ -4,7 +4,7 @@ layout: home
 hero:
   name: Test Flakiness Detector
   text: Find Unreliable Tests
-  tagline: Detect flaky tests by running them multiple times and tracking failure rates. Zero dependencies, works with any test framework.
+  tagline: Detect flaky tests by running them multiple times and tracking failure rates. Zero external dependencies, works with any test framework.
   actions:
     - theme: brand
       text: Get Started
@@ -31,8 +31,8 @@ features:
 
   - icon:
       src: /icons/zap.svg
-    title: Zero Dependencies
-    details: Uses only Node.js built-in modules. No npm dependencies to manage, update, or worry about security issues.
+    title: Zero External Dependencies
+    details: Uses cli-progress-reporting (Tuulbelt tool composition). No external npm dependencies to manage, update, or worry about security issues.
 
   - icon:
       src: /icons/tool.svg
@@ -104,7 +104,7 @@ cd test-flakiness-detector
 npm install
 ```
 
-No runtime dependencies. Just Node.js 18+.
+**Dependencies:** Uses [cli-progress-reporting](https://github.com/tuulbelt/cli-progress-reporting) (automatically fetched). Zero external dependencies. Requires Node.js 18+.
 
 ## Next Steps
 

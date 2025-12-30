@@ -41,11 +41,13 @@ jobs:
       - name: Build
         run: npm run build
 
-      - name: Verify zero runtime dependencies
+      - name: Verify zero external dependencies (Tuulbelt deps allowed)
         run: |
-          if grep -q '"dependencies".*{.*[^}]' package.json; then
-            echo "ERROR: Runtime dependencies found!"
-            cat package.json | grep -A10 '"dependencies"'
+          # Extract dependencies section and check for non-Tuulbelt packages
+          if grep -A20 '"dependencies"' package.json | grep -v '@tuulbelt/' | grep -qE '^\s+"[^"]+"\s*:'; then
+            echo "ERROR: External runtime dependencies found!"
+            echo "Only @tuulbelt/* dependencies are allowed (PRINCIPLES.md Exception 2)"
+            cat package.json | grep -A20 '"dependencies"'
             exit 1
           fi
-          echo "✓ Zero runtime dependencies verified"
+          echo "✓ Zero external dependencies verified (Tuulbelt tool composition allowed)"
