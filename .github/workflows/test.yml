@@ -43,11 +43,13 @@ jobs:
 
       - name: Verify zero external dependencies (Tuulbelt deps allowed)
         run: |
-          # Extract dependencies section and check for non-Tuulbelt packages
-          if grep -A20 '"dependencies"' package.json | grep -v '@tuulbelt/' | grep -qE '^\s+"[^"]+"\s*:'; then
+          # Extract only "dependencies" section (not "devDependencies") and check for non-Tuulbelt packages
+          if awk '/"dependencies":/,/},/' package.json | grep -v '@tuulbelt/' | grep -qE '^\s+"[^"]+"\s*:\s*"'; then
             echo "ERROR: External runtime dependencies found!"
             echo "Only @tuulbelt/* dependencies are allowed (PRINCIPLES.md Exception 2)"
-            cat package.json | grep -A20 '"dependencies"'
+            echo ""
+            echo "Dependencies section:"
+            awk '/"dependencies":/,/},/' package.json
             exit 1
           fi
           echo "✓ Zero external dependencies verified (Tuulbelt tool composition allowed)"
