@@ -314,8 +314,8 @@ flaky --test "echo 'test'" --runs 3 --verbose
 ### Quick Start
 
 ```bash
-git clone https://github.com/tuulbelt/tuulbelt.git
-cd tuulbelt/test-flakiness-detector
+git clone https://github.com/tuulbelt/test-flakiness-detector.git
+cd test-flakiness-detector
 npm install
 flaky --test "npm test" --runs 10
 ```
