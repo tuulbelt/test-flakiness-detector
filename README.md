@@ -307,7 +307,7 @@ flaky --test "echo 'test'" --runs 3 --verbose
 </details>
 
 > **Note:** Example outputs are auto-generated and committed to [`examples/outputs/`](examples/outputs/) directory.
-> See [`.github/workflows/update-demos.yml`](.github/workflows/update-demos.yml) for automation details.
+> See [`.github/workflows/create-demo.yml`](.github/workflows/create-demo.yml) for automation details.
 
 ## Try It Yourself
 
