@@ -1,3 +1,5 @@
+> **Part of [Tuulbelt](https://github.com/tuulbelt/tuulbelt)** — A collection of zero-dependency tools.
+
 # Test Flakiness Detector / `flaky`
 
 [![Tests](https://github.com/tuulbelt/test-flakiness-detector/actions/workflows/test.yml/badge.svg)](https://github.com/tuulbelt/test-flakiness-detector/actions/workflows/test.yml)
@@ -6,8 +8,6 @@
 ![Dogfooded](https://img.shields.io/badge/dogfooded-🐕-purple)
 ![Tests](https://img.shields.io/badge/tests-132%2B%20passing-success)
 [![License](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
-
-**Part of [Tuulbelt](https://github.com/tuulbelt/tuulbelt)** — A collection of focused, zero-dependency tools
 
 Detect unreliable tests by running them multiple times and tracking failure rates.
 
