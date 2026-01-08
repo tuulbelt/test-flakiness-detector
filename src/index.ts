@@ -70,6 +70,15 @@ function parseArgs(args: string[]): { config: CLIConfig; showHelp: boolean } {
           i++; // Skip next arg
         }
       }
+    } else if (arg === '--threshold') {
+      const thresholdValue = args[i + 1];
+      if (thresholdValue) {
+        const thresholdNum = parseFloat(thresholdValue);
+        if (!isNaN(thresholdNum)) {
+          config.threshold = thresholdNum;
+          i++; // Skip next arg
+        }
+      }
     } else if (arg === '--test' || arg === '-t') {
       const testValue = args[i + 1];
       if (testValue) {
@@ -108,6 +117,7 @@ Usage: test-flakiness-detector [options]
 Options:
   -t, --test <command>     Test command to execute (required)
   -r, --runs <number>      Number of times to run the test (default: 10)
+  --threshold <percent>    Flakiness threshold 0-100 (default: 0, any failure = flaky)
   -f, --format <format>    Output format: json, text, minimal (default: json)
   -s, --stream             Stream progress events as newline-delimited JSON
   -v, --verbose            Enable verbose output
@@ -131,6 +141,9 @@ Examples:
 
   # Run with 20 iterations
   flaky --test "npm test" --runs 20
+
+  # Only flag tests failing >10% of the time as flaky
+  flaky --test "npm test" --threshold 10
 
   # Stream progress events (NDJSON)
   flaky --test "npm test" --stream

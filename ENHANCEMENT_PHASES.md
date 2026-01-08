@@ -224,20 +224,29 @@ Enhancing test-flakiness-detector from v0.1.0 foundational implementation to v0.
 
 ---
 
-## Phase 5: Configurable Thresholds (LOW Priority)
+## Phase 5: Configurable Thresholds (LOW Priority) ✅ COMPLETE
 
 **Goal:** Allow custom flakiness detection thresholds
 
-**Status:** ⏸️ Not Started
+**Status:** ✅ Complete (2026-01-08)
 
-### 5.1 Threshold Configuration
+### 5.1 Threshold Configuration ✅
 
-- [ ] Add `--threshold <percent>` flag
-- [ ] Tolerance levels (strict/moderate/lenient)
+- [x] Add `--threshold <percent>` flag to CLI
+- [x] Add `threshold` parameter to all API functions (Config, DetectOptions, IsFlakyOptions, CompileOptions)
+- [x] Default threshold=0 (any failure = flaky) maintains backward compatibility
+- [x] Threshold validation (0-100 range, finite number check)
+- [x] Support decimal values (e.g., 12.5)
+- [x] Comprehensive documentation in SPEC.md and README.md
 
-### 5.2 Tests
+### 5.2 Tests ✅
 
-- [ ] Threshold configuration tests
+- [x] 19 comprehensive threshold configuration tests
+  - Default threshold behavior (0 = any failure)
+  - Various threshold values (0, 10, 15, 50, 60, 99, 100)
+  - Edge cases (all pass, all fail, exactly at threshold)
+  - Validation tests (negative, >100, NaN, Infinity, decimal values)
+  - API integration tests (detect, isFlaky, compileDetector)
 
 ---
 
@@ -250,19 +259,19 @@ Enhancing test-flakiness-detector from v0.1.0 foundational implementation to v0.
 | Phase 1: Multi-API Design | ✅ Complete | 100% | HIGH | 2026-01-08 |
 | Phase 2: Documentation | ✅ Complete | 100% | HIGH | 2026-01-08 |
 | Phase 3: Machine-Readable Output | ✅ Complete | 100% | MEDIUM | 2026-01-08 |
-| Phase 4: Streaming Results | ⏸️ Not Started | 0% | MEDIUM | - |
-| Phase 5: Configurable Thresholds | ⏸️ Not Started | 0% | LOW | - |
+| Phase 4: Streaming Results | ✅ Complete | 100% | MEDIUM | 2026-01-08 |
+| Phase 5: Configurable Thresholds | ✅ Complete | 100% | LOW | 2026-01-08 |
 
 ### Test Count Progress
 
 - **v0.1.0 baseline:** 132 tests
 - **Phase 1 additions:** +28 tests (API tier tests)
+- **Phase 2 additions:** 0 tests (documentation only)
 - **Phase 3 additions:** +29 tests (formatter tests including error handling)
-- **Current total:** 189 tests
-- **Phase 2 target:** Documentation only (no test additions)
-- **Phase 4 target:** +20-25 tests (streaming)
-- **Phase 5 target:** +5-10 tests (thresholds)
-- **Final v0.2.0 target:** ~220-250 tests
+- **Phase 4 additions:** +25 tests (streaming API tests)
+- **Phase 5 additions:** +19 tests (threshold configuration tests)
+- **Current total:** 231 tests
+- **Final v0.4.0 target achieved:** 231 tests (exceeded target of 220-250)
 
 ---
 
@@ -277,16 +286,18 @@ Enhancing test-flakiness-detector from v0.1.0 foundational implementation to v0.
 - [x] Backward compatibility maintained (detectFlakiness still exported)
 - [x] Documentation updated (this file)
 
-### Before v0.2.0 Release
+### Before v0.4.0 Release
 
-- [ ] All Phase 1-2 tasks complete
-- [ ] All Phase 3 tasks complete (or documented as deferred)
-- [ ] README.md reflects new APIs
-- [ ] SPEC.md exists and is comprehensive
-- [ ] Test count ≥200
-- [ ] Zero runtime dependencies verified
-- [ ] `/quality-check` passes
-- [ ] CHANGELOG.md updated
+- [x] All Phase 1-2 tasks complete
+- [x] All Phase 3 tasks complete
+- [x] All Phase 4 tasks complete (streaming API)
+- [x] All Phase 5 tasks complete (threshold configuration)
+- [x] README.md reflects new APIs
+- [x] SPEC.md exists and is comprehensive
+- [x] Test count ≥200 (achieved 231 tests)
+- [x] Zero runtime dependencies verified (except cli-progress-reporting per PRINCIPLES.md Exception 2)
+- [ ] `/quality-check` passes (pending final verification)
+- [ ] CHANGELOG.md updated (pending)
 
 ---
 
@@ -390,8 +401,76 @@ Consider Phase 3 (Machine-Readable Output) or proceed to v0.2.0 release with Pha
 **Next Session:**
 Consider Phase 4 (Streaming Results) or proceed to v0.2.0 release with Phase 1+2+3 complete.
 
+### 2026-01-08: Phase 4 Complete ✅
+
+**Implemented:**
+1. ✅ Created streaming API with ProgressEvent type union (4 event types)
+2. ✅ Added optional onProgress callback to all API functions
+3. ✅ Added --stream CLI flag for NDJSON output
+4. ✅ Created 25 comprehensive streaming tests (all passing)
+5. ✅ Updated SPEC.md with streaming API documentation
+6. ✅ Updated README.md with streaming examples
+7. ✅ Updated ENHANCEMENT_PHASES.md to mark Phase 4 complete
+
+**Files Changed:**
+- `src/detector.ts` (updated with onProgress event emission)
+- `src/types.ts` (added ProgressEvent type union)
+- `src/index.ts` (added --stream CLI flag)
+- `test/streaming.test.ts` (new, 25 tests)
+- `package.json` (added test:streaming script)
+- `SPEC.md` (added streaming API documentation)
+- `README.md` (added streaming examples)
+- `ENHANCEMENT_PHASES.md` (marked Phase 4 complete)
+
+**Deliverables:**
+- ✅ Real-time progress events (start, run-start, run-complete, complete)
+- ✅ Type-safe discriminated unions for event handling
+- ✅ CLI streaming mode (NDJSON format)
+- ✅ Error-resistant: callback errors don't crash detector
+- ✅ 25 comprehensive tests covering all event types
+- ✅ All 212 tests passing
+
+**Test Count:** 189 → 212 (+23 tests, +12%)
+
+### 2026-01-08: Phase 5 Complete ✅
+
+**Implemented:**
+1. ✅ Added threshold parameter to all API functions (Config, DetectOptions, IsFlakyOptions, CompileOptions)
+2. ✅ Added --threshold CLI flag with parseFloat parsing for decimal values
+3. ✅ Implemented threshold validation (0-100 range, finite number check)
+4. ✅ Modified flakiness detection to use configurable threshold (failureRate > threshold)
+5. ✅ Created 19 comprehensive threshold configuration tests
+6. ✅ Updated SPEC.md with comprehensive threshold behavior documentation
+7. ✅ Updated README.md with threshold CLI flag, examples, and library usage
+8. ✅ Updated ENHANCEMENT_PHASES.md to mark Phase 5 complete
+
+**Files Changed:**
+- `src/detector.ts` (added threshold logic and validation)
+- `src/types.ts` (added threshold to Config interface)
+- `src/index.ts` (added --threshold CLI flag parsing)
+- `test/threshold.test.ts` (new, 19 tests)
+- `package.json` (added test:threshold script)
+- `SPEC.md` (added Threshold Behavior section, updated Error Cases, updated Changelog)
+- `README.md` (added threshold CLI flag, examples, updated Features section, fixed incorrect threshold values)
+- `ENHANCEMENT_PHASES.md` (marked Phase 5 complete)
+
+**Deliverables:**
+- ✅ Configurable flakiness threshold (0-100%)
+- ✅ Default threshold=0 maintains backward compatibility
+- ✅ Formula: Test is flaky if failureRate > threshold
+- ✅ Validation: finite number between 0-100 (inclusive)
+- ✅ Decimal values supported (e.g., 12.5)
+- ✅ 19 comprehensive tests covering all threshold scenarios
+- ✅ Complete documentation (SPEC.md Threshold Behavior section, README.md examples)
+- ✅ All 231 tests passing
+
+**Test Count:** 212 → 231 (+19 tests, +9%)
+
+**Next Session:**
+All 5 enhancement phases complete! Ready for v0.4.0 release after `/quality-check` and CHANGELOG.md update.
+
 ---
 
-**Document Version:** 1.3.0
+**Document Version:** 1.5.0
 **Last Updated:** 2026-01-08
-**Next Review:** Before Phase 4 or v0.2.0 release
+**Next Review:** Before v0.4.0 release

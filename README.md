@@ -25,6 +25,7 @@ This tool runs your test command multiple times and identifies which tests have 
 - Composable via CLI or library API
 - Works with any test command (npm test, cargo test, pytest, etc.)
 - Configurable number of test runs
+- **Configurable threshold** — Ignore low-frequency failures (0-100% tolerance)
 - **Multiple output formats** — JSON (machine-readable), text (human-readable), minimal (pipe-friendly)
 - **Real-time progress tracking** for runs ≥ 5
 - Verbose mode for debugging
@@ -71,6 +72,12 @@ flaky --test "npm test" --format minimal
 # Run cargo tests with verbose output
 flaky --test "cargo test" --runs 15 --verbose
 
+# Ignore rare failures (only flag tests with >10% failure rate)
+flaky --test "npm test" --threshold 10
+
+# Tolerate infrastructure flakiness in CI
+flaky --test "npm test" --threshold 15 --runs 20
+
 # Show help
 flaky --help
 ```
@@ -90,7 +97,7 @@ const result = await detect({
   test: 'npm test',
   runs: 20,
   verbose: true,
-  threshold: 0.01  // Flag tests with ≥1% failure rate
+  threshold: 10  // Flag tests with >10% failure rate (ignore rare failures)
 });
 
 if (result.ok === false) {
@@ -147,7 +154,7 @@ import { compileDetector } from './src/index.js';
 const detector = compileDetector({
   test: 'npm test',
   verbose: false,
-  threshold: 0.01
+  threshold: 15  // Tolerate up to 15% failure rate
 });
 
 // Reuse with different run counts
@@ -239,6 +246,7 @@ Each line is a JSON event. Perfect for CI/CD pipelines or progress bars.
 
 - `-t, --test <command>` — Test command to execute (required)
 - `-r, --runs <number>` — Number of times to run the test (default: 10, max: 1000)
+- `--threshold <percent>` — Flakiness threshold 0-100 (default: 0, any failure = flaky)
 - `-f, --format <format>` — Output format: `json` (default), `text`, or `minimal`
 - `-s, --stream` — Stream progress events as newline-delimited JSON (NDJSON)
 - `-v, --verbose` — Enable verbose output showing each test run

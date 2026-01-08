@@ -29,6 +29,8 @@ export interface Config {
   testCommand: string;
   /** Enable verbose output */
   verbose?: boolean;
+  /** Custom flakiness threshold percentage (default: 0, any failure = flaky) */
+  threshold?: number;
   /** Optional callback for progress events */
   onProgress?: (event: ProgressEvent) => void;
 }

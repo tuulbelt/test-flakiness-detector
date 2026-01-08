@@ -181,11 +181,13 @@ Usage: test-flakiness-detector [options]
        flaky [options]
 
 Options:
-  -t, --test <command>   Test command to execute (required)
-  -r, --runs <number>    Number of times to run the test (default: 10)
-  -f, --format <format>  Output format: json, text, minimal (default: json)
-  -v, --verbose          Enable verbose output
-  -h, --help             Show help message
+  -t, --test <command>     Test command to execute (required)
+  -r, --runs <number>      Number of times to run the test (default: 10)
+  --threshold <percent>    Flakiness threshold 0-100 (default: 0, any failure = flaky)
+  -f, --format <format>    Output format: json, text, minimal (default: json)
+  -s, --stream             Stream progress events as newline-delimited JSON
+  -v, --verbose            Enable verbose output
+  -h, --help               Show help message
 
 Output Formats:
   json     - Complete JSON report (default, machine-readable)
@@ -197,6 +199,8 @@ Examples:
   flaky --test "npm test" --format text
   flaky --test "npm test" --format minimal
   flaky --test "npm test" --runs 20
+  flaky --test "npm test" --threshold 10
+  flaky --test "npm test" --stream
   flaky --test "cargo test" --runs 15 --verbose
 ```
 
@@ -433,6 +437,97 @@ type ProgressEvent =
 4. **Generate report**
    - Return FlakinessReport with all run results and flakiness statistics
 
+### Threshold Behavior
+
+**Phase 5 Enhancement:** Configurable flakiness threshold to ignore low-frequency failures.
+
+The `threshold` parameter (0-100) controls the flakiness detection sensitivity:
+
+**How It Works:**
+- Threshold is a percentage value from 0 to 100
+- A test is considered flaky if its failure rate **exceeds** the threshold
+- Formula: `failureRate > threshold` (not `>=`)
+- Failure rate is calculated as: `(failedRuns / totalRuns) × 100`
+
+**Default Behavior (threshold=0):**
+- Any failure (>0%) is considered flaky
+- Example: 1 failure in 10 runs (10% failure rate) → flaky
+- Most conservative setting, catches all intermittent failures
+
+**Threshold Values:**
+
+| Threshold | When Test is Flaky | Use Case |
+|-----------|-------------------|----------|
+| 0 (default) | Any failure (>0%) | Maximum sensitivity, catch all flakiness |
+| 10 | >10% failure rate | Ignore rare infrastructure failures |
+| 25 | >25% failure rate | Moderate tolerance for flaky environments |
+| 50 | >50% failure rate | Only flag tests that fail more often than they pass |
+| 99 | >99% failure rate | Essentially disable flakiness detection |
+
+**Examples:**
+
+1. **threshold=0 (default)**
+   ```bash
+   flaky --test "npm test" --runs 10
+   # 9 pass, 1 fail → 10% failure → flaky (10 > 0)
+   ```
+
+2. **threshold=10**
+   ```bash
+   flaky --test "npm test" --threshold 10 --runs 20
+   # 18 pass, 2 fail → 10% failure → NOT flaky (10 ≯ 10)
+   # 17 pass, 3 fail → 15% failure → flaky (15 > 10)
+   ```
+
+3. **threshold=50**
+   ```bash
+   flaky --test "npm test" --threshold 50 --runs 10
+   # 5 pass, 5 fail → 50% failure → NOT flaky (50 ≯ 50)
+   # 4 pass, 6 fail → 60% failure → flaky (60 > 50)
+   ```
+
+**Edge Cases:**
+- **All tests pass** (0% failure) → NOT flaky (regardless of threshold)
+- **All tests fail** (100% failure, but 0 passed) → NOT flaky (consistent failure, not intermittent)
+- **Some pass, some fail** → Check against threshold
+- **Exactly at threshold** → NOT flaky (e.g., 10% failure with threshold=10 is NOT flagged)
+
+**Use Cases:**
+
+1. **CI/CD with unstable infrastructure** (threshold=10-20):
+   - Ignore occasional network timeouts or resource contention
+   - Only flag tests with persistent flakiness
+
+2. **Strict reliability requirements** (threshold=0):
+   - Catch any intermittent failure
+   - Zero tolerance for flakiness
+
+3. **High-latency environments** (threshold=25-50):
+   - Tolerate failures due to external dependencies
+   - Focus on tests that fail more often
+
+**Library API:**
+```typescript
+import { detect } from '@tuulbelt/test-flakiness-detector';
+
+// Ignore failures <15%
+const result = await detect({
+  test: 'npm test',
+  runs: 20,
+  threshold: 15
+});
+
+if (result.ok && result.value.flakyTests.length > 0) {
+  console.log('Tests with >15% failure rate:', result.value.flakyTests);
+}
+```
+
+**Validation:**
+- Threshold must be a finite number
+- Range: 0 to 100 (inclusive)
+- Decimal values allowed (e.g., 12.5)
+- Invalid values return error: "Threshold must be between 0 and 100"
+
 ### Error Cases
 
 | Condition | Behavior |
@@ -441,6 +536,10 @@ type ProgressEvent =
 | Non-string test command | Return error: "Test command must be a non-empty string" |
 | runs < 1 | Return error: "Runs must be between 1 and 1000" |
 | runs > 1000 | Return error: "Runs must be between 1 and 1000" |
+| threshold < 0 | Return error: "Threshold must be between 0 and 100" |
+| threshold > 100 | Return error: "Threshold must be between 0 and 100" |
+| threshold = NaN | Return error: "Threshold must be between 0 and 100" |
+| threshold = Infinity | Return error: "Threshold must be between 0 and 100" |
 | Command not found | Success=true, but run result has success=false, exitCode=127 |
 | Command syntax error | Success=true, but run result has success=false, exitCode≠0 |
 
@@ -627,6 +726,20 @@ Potential improvements (without breaking changes):
    - Output formats for CI systems (JUnit XML, etc.)
 
 ## Changelog
+
+### v0.4.0 - 2026-01-08 (Phase 5)
+
+- **Configurable flakiness threshold** to ignore low-frequency failures:
+  - New `threshold` parameter (0-100) in all APIs (Config, DetectOptions, IsFlakyOptions, CompileOptions)
+  - CLI `--threshold <percent>` flag
+  - Default threshold=0 (any failure = flaky) maintains backward compatibility
+  - Formula: Test is flaky if `failureRate > threshold`
+  - Validation: Must be finite number between 0-100 (inclusive)
+  - Decimal values supported (e.g., 12.5)
+- **Enhanced error handling** for threshold validation
+- **Test coverage**: 231 tests (+19 threshold tests, +9%)
+- **Use cases**: Ignore infrastructure failures, tolerate unstable environments
+- Comprehensive threshold behavior documentation in SPEC.md
 
 ### v0.3.0 - 2026-01-08 (Phase 4)
 

@@ -4,7 +4,7 @@
 
 import { spawnSync } from 'child_process';
 import * as progress from '@tuulbelt/cli-progress-reporting';
-import { Config, TestRunResult, DetectionReport, TestFlakiness, ProgressEvent } from './types.js';
+import { Config, TestRunResult, DetectionReport, TestFlakiness } from './types.js';
 
 /**
  * Run a test command once and capture the result
@@ -66,7 +66,7 @@ function runTestOnce(command: string, verbose: boolean): TestRunResult {
  * ```
  */
 export async function detectFlakiness(config: Config): Promise<DetectionReport> {
-  const { testCommand, runs = 10, verbose = false, onProgress } = config;
+  const { testCommand, runs = 10, verbose = false, threshold = 0, onProgress } = config;
 
   if (!testCommand || typeof testCommand !== 'string') {
     return {
@@ -89,6 +89,18 @@ export async function detectFlakiness(config: Config): Promise<DetectionReport> 
       flakyTests: [],
       runs: [],
       error: 'Runs must be between 1 and 1000',
+    };
+  }
+
+  if (threshold !== undefined && (typeof threshold !== 'number' || !Number.isFinite(threshold) || threshold < 0 || threshold > 100)) {
+    return {
+      success: false,
+      totalRuns: 0,
+      passedRuns: 0,
+      failedRuns: 0,
+      flakyTests: [],
+      runs: [],
+      error: 'Threshold must be between 0 and 100',
     };
   }
 
@@ -166,18 +178,22 @@ export async function detectFlakiness(config: Config): Promise<DetectionReport> 
     }
   }
 
-  // Calculate flakiness: if some runs passed and some failed, the test is flaky
+  // Calculate flakiness: if some runs passed and some failed, check against threshold
   const flakyTests: TestFlakiness[] = [];
 
   if (passedRuns > 0 && failedRuns > 0) {
-    // The entire test suite is flaky
-    flakyTests.push({
-      testName: 'Test Suite',
-      passed: passedRuns,
-      failed: failedRuns,
-      totalRuns: runs,
-      failureRate: (failedRuns / runs) * 100,
-    });
+    const failureRate = (failedRuns / runs) * 100;
+
+    // Test is flaky if failure rate exceeds threshold (default 0 = any failure)
+    if (failureRate > threshold) {
+      flakyTests.push({
+        testName: 'Test Suite',
+        passed: passedRuns,
+        failed: failedRuns,
+        totalRuns: runs,
+        failureRate,
+      });
+    }
   }
 
   // Mark progress as complete
