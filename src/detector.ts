@@ -4,7 +4,7 @@
 
 import { spawnSync } from 'child_process';
 import * as progress from '@tuulbelt/cli-progress-reporting';
-import { Config, TestRunResult, DetectionReport, TestFlakiness } from './types.js';
+import { Config, TestRunResult, DetectionReport, TestFlakiness, ProgressEvent } from './types.js';
 
 /**
  * Run a test command once and capture the result
@@ -66,7 +66,7 @@ function runTestOnce(command: string, verbose: boolean): TestRunResult {
  * ```
  */
 export async function detectFlakiness(config: Config): Promise<DetectionReport> {
-  const { testCommand, runs = 10, verbose = false } = config;
+  const { testCommand, runs = 10, verbose = false, onProgress } = config;
 
   if (!testCommand || typeof testCommand !== 'string') {
     return {
@@ -90,6 +90,15 @@ export async function detectFlakiness(config: Config): Promise<DetectionReport> 
       runs: [],
       error: 'Runs must be between 1 and 1000',
     };
+  }
+
+  // Emit start event
+  if (onProgress) {
+    try {
+      onProgress({ type: 'start', totalRuns: runs });
+    } catch {
+      // Ignore errors from callback - don't let them crash the detector
+    }
   }
 
   // Initialize progress reporting (dogfooding cli-progress-reporting)
@@ -117,6 +126,15 @@ export async function detectFlakiness(config: Config): Promise<DetectionReport> 
       console.error(`[INFO] Run ${i + 1}/${runs}`);
     }
 
+    // Emit run-start event
+    if (onProgress) {
+      try {
+        onProgress({ type: 'run-start', runNumber: i + 1, totalRuns: runs });
+      } catch {
+        // Ignore errors from callback - don't let them crash the detector
+      }
+    }
+
     const result = runTestOnce(testCommand, verbose);
     results.push(result);
 
@@ -124,6 +142,21 @@ export async function detectFlakiness(config: Config): Promise<DetectionReport> 
       passedRuns++;
     } else {
       failedRuns++;
+    }
+
+    // Emit run-complete event
+    if (onProgress) {
+      try {
+        onProgress({
+          type: 'run-complete',
+          runNumber: i + 1,
+          totalRuns: runs,
+          success: result.success,
+          exitCode: result.exitCode,
+        });
+      } catch {
+        // Ignore errors from callback - don't let them crash the detector
+      }
     }
 
     // Update progress after each run
@@ -167,7 +200,7 @@ export async function detectFlakiness(config: Config): Promise<DetectionReport> 
     progress.clear({ id: progressId });
   }
 
-  return {
+  const report: DetectionReport = {
     success: true,
     totalRuns: runs,
     passedRuns,
@@ -175,4 +208,15 @@ export async function detectFlakiness(config: Config): Promise<DetectionReport> 
     flakyTests,
     runs: results,
   };
+
+  // Emit complete event
+  if (onProgress) {
+    try {
+      onProgress({ type: 'complete', report });
+    } catch {
+      // Ignore errors from callback - don't let them crash the detector
+    }
+  }
+
+  return report;
 }

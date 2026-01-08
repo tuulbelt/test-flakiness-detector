@@ -11,6 +11,15 @@ export type Result<T> =
   | { ok: false; error: Error };
 
 /**
+ * Progress event emitted during test execution
+ */
+export type ProgressEvent =
+  | { type: 'start'; totalRuns: number }
+  | { type: 'run-start'; runNumber: number; totalRuns: number }
+  | { type: 'run-complete'; runNumber: number; totalRuns: number; success: boolean; exitCode: number }
+  | { type: 'complete'; report: DetectionReport };
+
+/**
  * Configuration options for flakiness detection
  */
 export interface Config {
@@ -20,6 +29,8 @@ export interface Config {
   testCommand: string;
   /** Enable verbose output */
   verbose?: boolean;
+  /** Optional callback for progress events */
+  onProgress?: (event: ProgressEvent) => void;
 }
 
 /**
@@ -34,6 +45,8 @@ export interface DetectOptions {
   verbose?: boolean;
   /** Custom flakiness threshold percentage (default: 0, any failure = flaky) */
   threshold?: number;
+  /** Optional callback for progress events */
+  onProgress?: (event: ProgressEvent) => void;
 }
 
 /**
@@ -46,6 +59,8 @@ export interface IsFlakyOptions {
   runs?: number;
   /** Custom flakiness threshold percentage (default: 0) */
   threshold?: number;
+  /** Optional callback for progress events */
+  onProgress?: (event: ProgressEvent) => void;
 }
 
 /**
@@ -58,6 +73,8 @@ export interface CompileOptions {
   verbose?: boolean;
   /** Custom flakiness threshold percentage (default: 0) */
   threshold?: number;
+  /** Optional callback for progress events */
+  onProgress?: (event: ProgressEvent) => void;
 }
 
 /**

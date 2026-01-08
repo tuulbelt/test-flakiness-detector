@@ -9,7 +9,7 @@
 
 import { realpathSync } from 'node:fs';
 import { detectFlakiness } from './detector.js';
-import { Config } from './types.js';
+import { Config, ProgressEvent } from './types.js';
 import { formatReport, OutputFormat } from './formatters.js';
 
 // Re-export types
@@ -24,12 +24,11 @@ export type {
   DetectionReport,
   FlakinessReport,
   CompiledDetector,
+  ProgressEvent,
 } from './types.js';
 
-// Re-export formatter types
-export type { OutputFormat } from './formatters.js';
-
 // Re-export formatters
+export type { OutputFormat } from './formatters.js';
 export { formatReport, formatJSON, formatText, formatMinimal } from './formatters.js';
 
 // Re-export multi-tier APIs
@@ -39,10 +38,11 @@ export { detect, isFlaky, compileDetector } from './api.js';
 export { detectFlakiness };
 
 /**
- * CLI-specific configuration extending base Config with output format
+ * CLI-specific configuration extending base Config
  */
 interface CLIConfig extends Config {
   format?: OutputFormat;
+  stream?: boolean;
 }
 
 /**
@@ -53,7 +53,8 @@ function parseArgs(args: string[]): { config: CLIConfig; showHelp: boolean } {
     testCommand: '',
     runs: 10,
     verbose: false,
-    format: 'json', // Default format is JSON (backward compatible)
+    format: 'json',
+    stream: false,
   };
   let showHelp = false;
 
@@ -83,6 +84,8 @@ function parseArgs(args: string[]): { config: CLIConfig; showHelp: boolean } {
         config.format = formatValue;
         i++; // Skip next arg
       }
+    } else if (arg === '--stream' || arg === '-s') {
+      config.stream = true;
     } else if (arg === '--help' || arg === '-h') {
       showHelp = true;
     }
@@ -103,11 +106,12 @@ Usage: test-flakiness-detector [options]
        flaky [options]
 
 Options:
-  -t, --test <command>   Test command to execute (required)
-  -r, --runs <number>    Number of times to run the test (default: 10)
-  -f, --format <format>  Output format: json, text, minimal (default: json)
-  -v, --verbose          Enable verbose output
-  -h, --help             Show this help message
+  -t, --test <command>     Test command to execute (required)
+  -r, --runs <number>      Number of times to run the test (default: 10)
+  -f, --format <format>    Output format: json, text, minimal (default: json)
+  -s, --stream             Stream progress events as newline-delimited JSON
+  -v, --verbose            Enable verbose output
+  -h, --help               Show this help message
 
 Output Formats:
   json     - Complete JSON report (default, machine-readable)
@@ -127,6 +131,9 @@ Examples:
 
   # Run with 20 iterations
   flaky --test "npm test" --runs 20
+
+  # Stream progress events (NDJSON)
+  flaky --test "npm test" --stream
 
   # Verbose output
   flaky --test "cargo test" --runs 15 --verbose
@@ -153,6 +160,17 @@ Library Usage:
   import { formatReport } from 'test-flakiness-detector';
   const output = formatReport(report.value, 'text');
 
+  // Streaming progress events
+  const result = await detect({
+    test: 'npm test',
+    runs: 10,
+    onProgress: (event) => {
+      if (event.type === 'run-complete') {
+        console.log(\`Run \${event.runNumber}: \${event.success ? 'PASS' : 'FAIL'}\`);
+      }
+    }
+  });
+
 See README.md for complete API documentation.`);
 }
 
@@ -174,13 +192,23 @@ async function main(): Promise<void> {
     return;
   }
 
+  // Set up streaming if --stream flag is enabled
+  if (config.stream) {
+    config.onProgress = (event: ProgressEvent) => {
+      // Output progress events as newline-delimited JSON
+      console.log(JSON.stringify(event));
+    };
+  }
+
   const report = await detectFlakiness(config);
 
   if (report.success) {
-    // Format and output report
-    const format = config.format ?? 'json';
-    const output = formatReport(report, format);
-    console.log(output);
+    // Output final report (unless streaming, which already emitted 'complete' event)
+    if (!config.stream) {
+      const format = config.format ?? 'json';
+      const output = formatReport(report, format);
+      console.log(output);
+    }
 
     // Exit with code 1 if flaky tests were found
     if (report.flakyTests.length > 0) {

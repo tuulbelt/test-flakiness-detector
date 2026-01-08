@@ -67,6 +67,7 @@ export async function detect(options: DetectOptions): Promise<Result<DetectionRe
       testCommand: options.test,
       runs,
       verbose: options.verbose ?? false,
+      onProgress: options.onProgress,
     };
 
     const report = await detectFlakiness(config);
@@ -144,6 +145,7 @@ export async function isFlaky(options: IsFlakyOptions): Promise<Result<boolean>>
       testCommand: options.test,
       runs,
       verbose: false, // Never verbose for boolean check
+      onProgress: options.onProgress,
     };
 
     const report = await detectFlakiness(config);
@@ -222,6 +224,7 @@ export function compileDetector(options: CompileOptions): CompiledDetector {
           testCommand: options.test,
           runs,
           verbose: options.verbose ?? false,
+          onProgress: options.onProgress,
         };
 
         const report = await detectFlakiness(config);
