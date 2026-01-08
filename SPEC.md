@@ -31,17 +31,116 @@ This tool addresses these gaps by automating the detection process.
 
 ## Interface
 
-### Library API
+### Library API (Multi-tier Design)
+
+**Phase 1 Enhancement:** Three-tier API design following Property Validator gold standard.
+
+#### 1. detect() - Full Detection with Result Type
+
+Comprehensive flakiness detection with detailed report and non-throwing error handling.
 
 ```typescript
-import { detectFlakiness, Config, FlakinessReport } from './src/index.js';
+import { detect, DetectOptions, DetectionReport, Result } from '@tuulbelt/test-flakiness-detector';
+
+// Result type (non-throwing error handling)
+type Result<T> =
+  | { ok: true; value: T }
+  | { ok: false; error: Error };
+
+interface DetectOptions {
+  test: string;        // Test command to execute (required)
+  runs?: number;       // Number of runs (default: 10, range: 1-1000)
+  verbose?: boolean;   // Enable progress logging (default: false)
+  threshold?: number;  // Failure rate threshold (default: 0.01)
+}
+
+interface DetectionReport {
+  success: boolean;           // No flaky tests found
+  totalRuns: number;          // Total test executions
+  passedRuns: number;         // Successful runs
+  failedRuns: number;         // Failed runs
+  flakyTests: TestFlakiness[]; // Detected flaky tests
+  runs: TestRunResult[];      // All individual run results
+  error?: string;             // Optional error message
+}
+
+async function detect(options: DetectOptions): Promise<Result<DetectionReport>>;
+```
+
+**Example:**
+```typescript
+const result = await detect({ test: 'npm test', runs: 20 });
+if (result.ok) {
+  console.log(`Found ${result.value.flakyTests.length} flaky tests`);
+} else {
+  console.error('Detection failed:', result.error.message);
+}
+```
+
+#### 2. isFlaky() - Fast Boolean Check
+
+Quick CI gate to determine if tests are flaky (optimized for speed with fewer runs).
+
+```typescript
+import { isFlaky, IsFlakyOptions } from '@tuulbelt/test-flakiness-detector';
+
+interface IsFlakyOptions {
+  test: string;       // Test command to execute (required)
+  runs?: number;      // Number of runs (default: 5, range: 1-1000)
+  threshold?: number; // Failure rate threshold (default: 0.01)
+}
+
+async function isFlaky(options: IsFlakyOptions): Promise<Result<boolean>>;
+```
+
+**Example:**
+```typescript
+const result = await isFlaky({ test: 'npm test' });
+if (result.ok && result.value) {
+  console.error('⚠️ Flakiness detected!');
+  process.exit(1);
+}
+```
+
+#### 3. compileDetector() - Pre-compiled Detector
+
+Pre-compile detector configuration for repeated use (caching optimization).
+
+```typescript
+import { compileDetector, CompileOptions, CompiledDetector } from '@tuulbelt/test-flakiness-detector';
+
+interface CompileOptions {
+  test: string;       // Test command to execute (required)
+  verbose?: boolean;  // Enable progress logging (default: false)
+  threshold?: number; // Failure rate threshold (default: 0.01)
+}
+
+interface CompiledDetector {
+  run(runs: number): Promise<Result<DetectionReport>>;
+  getCommand(): string;
+  getOptions(): CompileOptions;
+}
+
+function compileDetector(options: CompileOptions): CompiledDetector;
+```
+
+**Example:**
+```typescript
+const detector = compileDetector({ test: 'npm test', verbose: true });
+const result1 = await detector.run(10);  // First run
+const result2 = await detector.run(20);  // Reuse configuration
+```
+
+#### 4. detectFlakiness() - Legacy API (Deprecated)
+
+**Status:** Maintained for backward compatibility, use `detect()` for new code.
+
+```typescript
+import { detectFlakiness, Config, FlakinessReport } from '@tuulbelt/test-flakiness-detector';
 
 interface Config {
-  /** Test command to execute (required) */
   testCommand: string;
-  /** Number of times to run the test (default: 10, max: 1000) */
   runs?: number;
-  /** Enable verbose output (default: false) */
   verbose?: boolean;
 }
 
@@ -70,7 +169,7 @@ interface FlakinessReport {
   error?: string;
 }
 
-function detectFlakiness(config: Config): FlakinessReport;
+async function detectFlakiness(config: Config): Promise<FlakinessReport>;
 ```
 
 ### CLI Interface
@@ -320,10 +419,19 @@ Output:
 
 ## Exit Codes
 
-| Code | Meaning |
-|------|---------|
-| 0 | Detection successful, no flaky tests found |
-| 1 | Invalid arguments, execution error, OR flaky tests detected |
+**Phase 1 Enhancement:** Separated invalid arguments from flaky detection.
+
+| Code | Meaning | Description |
+|------|---------|-------------|
+| 0 | Success | Detection successful, no flaky tests found |
+| 1 | Flaky Detected | One or more flaky tests found |
+| 2 | Invalid Args | Invalid arguments or validation error |
+
+**Example:**
+```bash
+flaky --test "npm test" --runs 10
+echo $?  # 0 = no flaky, 1 = flaky found, 2 = invalid args
+```
 
 ## Limitations
 
@@ -366,6 +474,19 @@ Potential improvements (without breaking changes):
    - Early termination if flakiness detected
 
 ## Changelog
+
+### v0.2.0 - 2026-01-08 (Phase 1)
+
+- **Multi-tier API design** following Property Validator gold standard:
+  - `detect()` - Full detection with Result type (non-throwing)
+  - `isFlaky()` - Fast boolean check for CI gates
+  - `compileDetector()` - Pre-compiled detector for repeated use
+- **Result type pattern** for non-throwing error handling
+- **Exit code separation**: 0 (success), 1 (flaky), 2 (invalid args)
+- **Tree-shaking support** via exports field in package.json
+- **Test suite expansion**: 132 → 160 tests (+28 API tests, +21%)
+- **Backward compatibility**: Legacy `detectFlakiness()` API preserved
+- Full JSDoc coverage with @example blocks
 
 ### v0.1.0 - 2025-12-29
 
