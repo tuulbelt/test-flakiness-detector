@@ -202,22 +202,25 @@ Enhancing test-flakiness-detector from v0.1.0 foundational implementation to v0.
 
 **Goal:** Emit results as tests complete (not just at end)
 
-**Status:** ⏸️ Not Started
+**Status:** ✅ Complete (2026-01-08)
 
 ### 4.1 Streaming API
 
-- [ ] Add `detectStreaming()` API
-- [ ] Event-based streaming for library consumers
+- [x] ProgressEvent type union (start, run-start, run-complete, complete)
+- [x] Optional onProgress callback in all API functions
+- [x] Event-based streaming for library consumers
 
 ### 4.2 CLI Streaming Output
 
-- [ ] `--stream` flag for real-time output
-- [ ] Show progress as tests run
+- [x] `--stream` flag for NDJSON real-time output
+- [x] Show progress as tests run (event-based)
 
 ### 4.3 Tests
 
-- [ ] Streaming API tests
-- [ ] Event emission tests
+- [x] 25 comprehensive streaming API tests (all passing)
+- [x] Event emission tests (order, data integrity)
+- [x] Callback error handling tests
+- [x] API integration tests (detect, isFlaky, compileDetector)
 
 ---
 

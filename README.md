@@ -198,17 +198,55 @@ if (result.ok) {
 
 See [examples/library-api.ts](examples/library-api.ts) for complete examples.
 
+####  Real-Time Progress Monitoring (Streaming API)
+
+Monitor test progress in real-time with the optional `onProgress` callback:
+
+```typescript
+import { detect, type ProgressEvent } from './src/index.js';
+
+const result = await detect({
+  test: 'npm test',
+  runs: 20,
+  onProgress: (event: ProgressEvent) => {
+    switch (event.type) {
+      case 'start':
+        console.log(`Starting ${event.totalRuns} test runs`);
+        break;
+      case 'run-start':
+        console.log(`Run ${event.runNumber}/${event.totalRuns} starting...`);
+        break;
+      case 'run-complete':
+        const status = event.success ? '✓ PASS' : '✗ FAIL';
+        console.log(`Run ${event.runNumber}: ${status}`);
+        break;
+      case 'complete':
+        console.log(`Done! Found ${event.report.flakyTests.length} flaky tests`);
+        break;
+    }
+  }
+});
+```
+
+**CLI streaming** (NDJSON format):
+```bash
+flaky --test "npm test" --stream
+```
+
+Each line is a JSON event. Perfect for CI/CD pipelines or progress bars.
+
 ## CLI Options
 
 - `-t, --test <command>` — Test command to execute (required)
 - `-r, --runs <number>` — Number of times to run the test (default: 10, max: 1000)
 - `-f, --format <format>` — Output format: `json` (default), `text`, or `minimal`
+- `-s, --stream` — Stream progress events as newline-delimited JSON (NDJSON)
 - `-v, --verbose` — Enable verbose output showing each test run
 - `-h, --help` — Show help message
 
 ## Output Format
 
-The tool supports three output formats via the `--format` flag:
+The tool supports three output formats via the `--format` flag, plus a streaming mode via `--stream`:
 
 ### JSON Format (default)
 

@@ -334,6 +334,83 @@ flaky --test "npm test" --format minimal | wc -l
 flaky --test "npm test" --format minimal > flaky-tests.txt
 ```
 
+#### Format: Streaming (NDJSON)
+
+Real-time progress events as newline-delimited JSON (`--stream`):
+
+**Event Types:**
+
+1. **start** - Emitted once at beginning
+2. **run-start** - Emitted before each test run
+3. **run-complete** - Emitted after each test run with result
+4. **complete** - Emitted once at end with full report
+
+**CLI Output:**
+```bash
+flaky --test "npm test" --runs 3 --stream
+```
+
+**Output (NDJSON format):**
+```json
+{"type":"start","totalRuns":3}
+{"type":"run-start","runNumber":1,"totalRuns":3}
+{"type":"run-complete","runNumber":1,"totalRuns":3,"success":true,"exitCode":0}
+{"type":"run-start","runNumber":2,"totalRuns":3}
+{"type":"run-complete","runNumber":2,"totalRuns":3,"success":false,"exitCode":1}
+{"type":"run-start","runNumber":3,"totalRuns":3}
+{"type":"run-complete","runNumber":3,"totalRuns":3,"success":true,"exitCode":0}
+{"type":"complete","report":{...full DetectionReport...}}
+```
+
+**Library API:**
+```typescript
+import { detect, type ProgressEvent } from 'test-flakiness-detector';
+
+const result = await detect({
+  test: 'npm test',
+  runs: 10,
+  onProgress: (event: ProgressEvent) => {
+    switch (event.type) {
+      case 'start':
+        console.log(`Starting ${event.totalRuns} test runs`);
+        break;
+      case 'run-start':
+        console.log(`Run ${event.runNumber}/${event.totalRuns} starting...`);
+        break;
+      case 'run-complete':
+        const status = event.success ? 'PASS' : 'FAIL';
+        console.log(`Run ${event.runNumber}: ${status} (exit ${event.exitCode})`);
+        break;
+      case 'complete':
+        console.log(`Completed: ${event.report.flakyTests.length} flaky tests`);
+        break;
+    }
+  }
+});
+```
+
+**ProgressEvent Type Definition:**
+```typescript
+type ProgressEvent =
+  | { type: 'start'; totalRuns: number }
+  | { type: 'run-start'; runNumber: number; totalRuns: number }
+  | { type: 'run-complete'; runNumber: number; totalRuns: number; success: boolean; exitCode: number }
+  | { type: 'complete'; report: DetectionReport };
+```
+
+**Key Features:**
+- **Real-time updates**: Events emitted as runs progress (not buffered)
+- **Type-safe**: Discriminated union with TypeScript type narrowing
+- **Error handling**: Callback errors don't crash detector (silently caught)
+- **CLI streaming**: NDJSON format for easy parsing line-by-line
+- **API flexibility**: Optional `onProgress` callback in all API functions
+
+**Use Cases:**
+- CI/CD systems that need real-time progress (e.g., GitHub Actions status updates)
+- Progress bars in CLI wrappers
+- Early detection/cancellation (monitor events and abort if needed)
+- Custom logging/reporting pipelines
+
 ## Behavior
 
 ### Normal Operation
@@ -549,11 +626,19 @@ Potential improvements (without breaking changes):
    - GitLab CI support
    - Output formats for CI systems (JUnit XML, etc.)
 
-6. **Incremental reporting**:
-   - Stream results as runs complete
-   - Early termination if flakiness detected
-
 ## Changelog
+
+### v0.3.0 - 2026-01-08 (Phase 4)
+
+- **Streaming API** for real-time progress monitoring:
+  - `ProgressEvent` type union with 4 event types (start, run-start, run-complete, complete)
+  - Optional `onProgress` callback in all API functions (detect, isFlaky, compileDetector)
+  - CLI `--stream` flag for NDJSON output
+  - Error-resistant: callback errors don't crash detector
+- **Enhanced examples** in help text showing streaming usage
+- **Test coverage**: 212 tests (+25 streaming tests, +13%)
+- Real-time event emission (not buffered)
+- Type-safe discriminated unions for event handling
 
 ### v0.2.0 - 2026-01-08 (Phase 1)
 
