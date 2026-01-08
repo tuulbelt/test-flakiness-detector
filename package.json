@@ -1,6 +1,6 @@
 {
   "name": "@tuulbelt/test-flakiness-detector",
-  "version": "0.1.0",
+  "version": "0.4.0",
   "description": "Detect unreliable tests by running them multiple times and tracking failure rates",
   "main": "src/index.ts",
   "type": "module",

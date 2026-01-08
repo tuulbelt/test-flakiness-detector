@@ -7,6 +7,68 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.4.0] - 2026-01-08
+
+### Added
+- **Configurable flakiness threshold** to ignore low-frequency failures:
+  - New `threshold` parameter (0-100%) in all APIs
+  - CLI `--threshold <percent>` flag
+  - Default threshold=0 (any failure = flaky) maintains backward compatibility
+  - Formula: Test is flaky if `failureRate > threshold`
+  - Support for decimal values (e.g., 12.5)
+- **Threshold validation**: Range 0-100, finite number check
+- **19 new threshold tests**: Default behavior, various values, edge cases, validation, API integration
+- **Comprehensive documentation**: SPEC.md Threshold Behavior section, README examples
+
+### Changed
+- Test count: 212 → 231 tests (+9%)
+
+### Implementation Notes
+- Backward compatible: default threshold=0 preserves existing behavior
+- Use cases: Ignore infrastructure failures (10-20%), tolerate unstable environments (25-50%)
+
+## [0.3.0] - 2026-01-08
+
+### Added
+- **Streaming API** for real-time progress monitoring:
+  - `ProgressEvent` type union with 4 event types (start, run-start, run-complete, complete)
+  - Optional `onProgress` callback in all API functions
+  - CLI `--stream` flag for NDJSON output
+  - Error-resistant: callback errors don't crash detector
+- **25 new streaming tests**: Event emission, order, data integrity, error handling
+- **Real-time event emission** (not buffered)
+- **Type-safe discriminated unions** for event handling
+
+### Changed
+- Test count: 189 → 212 tests (+12%)
+
+### Implementation Notes
+- Events emitted as runs progress for CI/CD integration
+- Callback errors silently caught to prevent detector crashes
+
+## [0.2.5] - 2026-01-08
+
+### Added
+- **Machine-readable output formats** for CI/CD integration:
+  - `--format json` (default) - Complete DetectionReport in JSON
+  - `--format text` - Human-readable text output with emojis
+  - `--format minimal` - Only flaky test names (pipe-friendly)
+- **Formatters module** (`src/formatters.ts`):
+  - `formatJSON()` - Pretty-printed JSON output
+  - `formatText()` - Human-readable text with summary
+  - `formatMinimal()` - Test names only (one per line)
+  - `formatReport()` - Unified formatter with exhaustiveness checking
+- **29 new formatter tests**: JSON, text, minimal formats, error handling
+
+### Changed
+- Test count: 160 → 189 tests (+18%)
+
+### Implementation Notes
+- Proper error display in all output formats
+- Exhaustive pattern matching for format types
+
+## [0.2.0] - 2026-01-08
+
 ### Added
 - **Multi-tier API design** following Property Validator gold standard:
   - `detect()` - Full detection report with Result type
@@ -17,8 +79,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - `DetectOptions`, `IsFlakyOptions`, `CompileOptions`
   - `DetectionReport` (replaces FlakinessReport)
   - `CompiledDetector` interface
-- **Comprehensive API tests**: 28 new tests covering all APIs
+- **28 new API tests**: Covering all APIs, Result type, backward compatibility
 - **Library usage examples** in CLI help text
+- **Tree-shaking support** via exports field in package.json
 
 ### Changed
 - Extracted core detection logic to `src/detector.ts` for modularity
