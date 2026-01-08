@@ -293,6 +293,12 @@ Enhancing test-flakiness-detector from v0.1.0 foundational implementation to v0.
 - `test/api.test.ts` (new, 28 tests)
 - `package.json` (updated)
 
+**Phase 1 Refinement (2026-01-08):**
+- ✅ Added exports field to package.json for tree-shaking support
+- ✅ Verified JSDoc coverage on all exported functions
+- ✅ Confirmed /v entry point not needed (different pattern from property-validator)
+- ✅ All 160 tests still passing after refinement
+
 **Next Session:**
 Start Phase 2: Documentation Expansion (SPEC.md, advanced examples, README updates)
 
