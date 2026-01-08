@@ -640,6 +640,22 @@ Potential improvements (without breaking changes):
 - Real-time event emission (not buffered)
 - Type-safe discriminated unions for event handling
 
+### v0.2.5 - 2026-01-08 (Phase 3)
+
+- **Machine-readable output formats** for CI/CD integration:
+  - `--format json` (default) - Complete DetectionReport in JSON
+  - `--format text` - Human-readable text output with emojis
+  - `--format minimal` - Only flaky test names (pipe-friendly)
+- **New formatters module** (src/formatters.ts):
+  - `formatJSON()` - Pretty-printed JSON output
+  - `formatText()` - Human-readable text with summary
+  - `formatMinimal()` - Test names only (one per line)
+  - `formatReport()` - Unified formatter with exhaustiveness checking
+- **Error handling improvements** in all formatters
+- **Test coverage**: 189 tests (+29 formatter tests, +18%)
+- Proper error display in all output formats
+- CLI --format flag validation and help text
+
 ### v0.2.0 - 2026-01-08 (Phase 1)
 
 - **Multi-tier API design** following Property Validator gold standard:
