@@ -87,7 +87,7 @@ const result = await detect({
   threshold: 0.01  // Flag tests with ≥1% failure rate
 });
 
-if (!result.ok) {
+if (result.ok === false) {
   console.error('Detection failed:', result.error.message);
   process.exit(2);
 }
@@ -116,7 +116,7 @@ const result = await isFlaky({
   runs: 5  // Faster: default is 5 for quick feedback
 });
 
-if (!result.ok) {
+if (result.ok === false) {
   console.error('Check failed:', result.error.message);
   process.exit(2);
 }

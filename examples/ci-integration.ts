@@ -43,7 +43,7 @@ async function githubActions() {
     runs: 5,  // Fast: 5 runs for quick feedback
   });
 
-  if (!result.ok) {
+  if (result.ok === false) {
     console.error('❌ Flakiness detection failed:', result.error.message);
     process.exit(2);
   }
@@ -99,7 +99,7 @@ async function githubActionsFull() {
     verbose: true,
   });
 
-  if (!result.ok) {
+  if (result.ok === false) {
     console.error('❌ Detection failed:', result.error.message);
     process.exit(2);
   }
@@ -156,7 +156,7 @@ async function gitlabCI() {
     verbose: false,
   });
 
-  if (!result.ok) {
+  if (result.ok === false) {
     console.error('❌ Detection failed:', result.error.message);
     process.exit(2);
   }
@@ -219,7 +219,7 @@ async function jenkins() {
     verbose: true,
   });
 
-  if (!result.ok) {
+  if (result.ok === false) {
     console.error('❌ Detection failed:', result.error.message);
     process.exit(2);
   }
@@ -280,7 +280,7 @@ async function circleci() {
     runs: 5,
   });
 
-  if (!result.ok) {
+  if (result.ok === false) {
     console.error('❌ Error:', result.error.message);
     process.exit(2);
   }

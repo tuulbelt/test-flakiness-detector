@@ -35,7 +35,7 @@ async function detectExample() {
   });
 
   // Result type pattern: check .ok before accessing .value
-  if (!result.ok) {
+  if (result.ok === false) {
     console.error('❌ Detection failed:', result.error.message);
     return;
   }
@@ -75,7 +75,7 @@ async function detectCustomConfig() {
     threshold: 5.0,     // Only flag if ≥5% failure rate
   });
 
-  if (!result.ok) {
+  if (result.ok === false) {
     console.error('Error:', result.error.message);
     return;
   }
@@ -112,7 +112,7 @@ async function isFlakyExample() {
     // runs: 5 (default - faster than detect's 10)
   });
 
-  if (!result.ok) {
+  if (result.ok === false) {
     console.error('❌ Check failed:', result.error.message);
     return;
   }
@@ -138,7 +138,7 @@ async function isFlakyAsCIGate() {
   console.log('Running quick flakiness check (5 runs)...');
   const result = await isFlaky({ test: 'npm test', runs: 5 });
 
-  if (!result.ok) {
+  if (result.ok === false) {
     console.error('Error:', result.error.message);
     process.exitCode = 2;  // Set exit code without exiting immediately
     return;

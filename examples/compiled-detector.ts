@@ -282,7 +282,7 @@ async function errorHandling() {
   const detector = compileDetector({ test: 'npm test' });
 
   const result = await detector.run(0);  // Invalid: runs must be >= 1
-  if (!result.ok) {
+  if (result.ok === false) {
     console.log('✓ Caught runtime error:', result.error.message);
   }
 }

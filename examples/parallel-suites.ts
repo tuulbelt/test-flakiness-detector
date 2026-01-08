@@ -196,7 +196,7 @@ async function prioritizedSuiteTesting() {
       verbose: false,
     });
 
-    if (!result.ok) {
+    if (result.ok === false) {
       console.error(`  ⚠️  Detection failed: ${result.error.message}\n`);
       continue;
     }
