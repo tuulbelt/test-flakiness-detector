@@ -8,21 +8,44 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Added
-- Initial project scaffolding
-- TypeScript configuration with strict mode
-- Node.js native test runner setup
-- Basic project structure
+- **Multi-tier API design** following Property Validator gold standard:
+  - `detect()` - Full detection report with Result type
+  - `isFlaky()` - Fast boolean check for CI gates
+  - `compileDetector()` - Pre-compiled detector for repeated use
+- **Result type** for non-throwing error handling: `Result<T> = { ok: true; value: T } | { ok: false; error: Error }`
+- **Type definitions** in `src/types.ts`:
+  - `DetectOptions`, `IsFlakyOptions`, `CompileOptions`
+  - `DetectionReport` (replaces FlakinessReport)
+  - `CompiledDetector` interface
+- **Comprehensive API tests**: 28 new tests covering all APIs
+- **Library usage examples** in CLI help text
 
-## [0.1.0] - YYYY-MM-DD (Not Released)
+### Changed
+- Extracted core detection logic to `src/detector.ts` for modularity
+- Restructured `src/index.ts` to export multiple APIs
+- Exit code 2 for invalid arguments (was 1), exit code 1 reserved for flakiness detection
+- Test count: 132 → 160 tests (+21%)
 
-### Added
-- Core functionality (TODO: describe main features)
-- Comprehensive test suite
-- API documentation
-- Usage examples
+### Deprecated
+- `FlakinessReport` type name (use `DetectionReport` instead, alias provided for backward compatibility)
+- `detectFlakiness()` function still exported but consider using `detect()` for new code
 
 ### Implementation Notes
-- Zero runtime dependencies
+- Zero runtime dependencies maintained (only @tuulbelt/cli-progress-reporting)
+- All new APIs follow Result type pattern (non-throwing)
+- Backward compatibility: existing `detectFlakiness()` and CLI behavior preserved
+
+## [0.1.0] - 2025-12-30
+
+### Added
+- Core flakiness detection by running tests multiple times
+- CLI with `--test`, `--runs`, `--verbose` flags
+- Integration with cli-progress-reporting for progress tracking
+- Comprehensive test suite (132 tests)
+- Complete documentation (README, SPEC.md, examples)
+
+### Implementation Notes
+- Zero runtime dependencies (except @tuulbelt/cli-progress-reporting)
 - Uses Node.js built-in modules only
 - TypeScript with strict type checking
 
