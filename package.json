@@ -4,6 +4,13 @@
   "description": "Detect unreliable tests by running them multiple times and tracking failure rates",
   "main": "src/index.ts",
   "type": "module",
+  "exports": {
+    ".": {
+      "types": "./src/index.ts",
+      "import": "./src/index.ts"
+    },
+    "./package.json": "./package.json"
+  },
   "bin": {
     "flaky": "./src/index.ts",
     "test-flakiness-detector": "./src/index.ts"
