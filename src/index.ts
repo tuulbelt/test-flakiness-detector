@@ -10,6 +10,7 @@
 import { realpathSync } from 'node:fs';
 import { detectFlakiness } from './detector.js';
 import { Config } from './types.js';
+import { formatReport, OutputFormat } from './formatters.js';
 
 // Re-export types
 export type {
@@ -25,6 +26,12 @@ export type {
   CompiledDetector,
 } from './types.js';
 
+// Re-export formatter types
+export type { OutputFormat } from './formatters.js';
+
+// Re-export formatters
+export { formatReport, formatJSON, formatText, formatMinimal } from './formatters.js';
+
 // Re-export multi-tier APIs
 export { detect, isFlaky, compileDetector } from './api.js';
 
@@ -32,13 +39,21 @@ export { detect, isFlaky, compileDetector } from './api.js';
 export { detectFlakiness };
 
 /**
+ * CLI-specific configuration extending base Config with output format
+ */
+interface CLIConfig extends Config {
+  format?: OutputFormat;
+}
+
+/**
  * Parse command line arguments
  */
-function parseArgs(args: string[]): { config: Config; showHelp: boolean } {
-  const config: Config = {
+function parseArgs(args: string[]): { config: CLIConfig; showHelp: boolean } {
+  const config: CLIConfig = {
     testCommand: '',
     runs: 10,
     verbose: false,
+    format: 'json', // Default format is JSON (backward compatible)
   };
   let showHelp = false;
 
@@ -62,6 +77,12 @@ function parseArgs(args: string[]): { config: Config; showHelp: boolean } {
       }
     } else if (arg === '--verbose' || arg === '-v') {
       config.verbose = true;
+    } else if (arg === '--format' || arg === '-f') {
+      const formatValue = args[i + 1];
+      if (formatValue === 'json' || formatValue === 'text' || formatValue === 'minimal') {
+        config.format = formatValue;
+        i++; // Skip next arg
+      }
     } else if (arg === '--help' || arg === '-h') {
       showHelp = true;
     }
@@ -84,25 +105,31 @@ Usage: test-flakiness-detector [options]
 Options:
   -t, --test <command>   Test command to execute (required)
   -r, --runs <number>    Number of times to run the test (default: 10)
+  -f, --format <format>  Output format: json, text, minimal (default: json)
   -v, --verbose          Enable verbose output
   -h, --help             Show this help message
 
+Output Formats:
+  json     - Complete JSON report (default, machine-readable)
+  text     - Human-readable text output
+  minimal  - Only flaky test names (one per line)
+
 Examples:
-  # Run npm test 10 times
+  # Run npm test 10 times (JSON output)
   flaky --test "npm test"
   test-flakiness-detector --test "npm test"
+
+  # Human-readable text output
+  flaky --test "npm test" --format text
+
+  # Minimal output (only flaky test names)
+  flaky --test "npm test" --format minimal
 
   # Run with 20 iterations
   flaky --test "npm test" --runs 20
 
   # Verbose output
   flaky --test "cargo test" --runs 15 --verbose
-
-Output:
-  JSON report containing:
-  - Total runs, passed runs, failed runs
-  - List of flaky tests with failure rates
-  - All test run results
 
 Exit Codes:
   0 - Detection completed successfully, no flakiness found
@@ -121,6 +148,10 @@ Library Usage:
   // Pre-compiled detector
   const detector = compileDetector({ test: 'npm test' });
   const report = await detector.run(10);
+
+  // Custom output format
+  import { formatReport } from 'test-flakiness-detector';
+  const output = formatReport(report.value, 'text');
 
 See README.md for complete API documentation.`);
 }
@@ -146,8 +177,10 @@ async function main(): Promise<void> {
   const report = await detectFlakiness(config);
 
   if (report.success) {
-    // Output JSON report
-    console.log(JSON.stringify(report, null, 2));
+    // Format and output report
+    const format = config.format ?? 'json';
+    const output = formatReport(report, format);
+    console.log(output);
 
     // Exit with code 1 if flaky tests were found
     if (report.flakyTests.length > 0) {

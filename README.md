@@ -25,7 +25,7 @@ This tool runs your test command multiple times and identifies which tests have 
 - Composable via CLI or library API
 - Works with any test command (npm test, cargo test, pytest, etc.)
 - Configurable number of test runs
-- Detailed JSON output with failure statistics
+- **Multiple output formats** — JSON (machine-readable), text (human-readable), minimal (pipe-friendly)
 - **Real-time progress tracking** for runs ≥ 5
 - Verbose mode for debugging
 
@@ -56,11 +56,17 @@ flaky --help
 ### As a CLI
 
 ```bash
-# Run npm test 10 times (default)
+# Run npm test 10 times (default, JSON output)
 flaky --test "npm test"
 
 # Run with 20 iterations
 flaky --test "npm test" --runs 20
+
+# Human-readable output
+flaky --test "npm test" --format text
+
+# Minimal output (just test names, perfect for piping)
+flaky --test "npm test" --format minimal
 
 # Run cargo tests with verbose output
 flaky --test "cargo test" --runs 15 --verbose
@@ -168,18 +174,45 @@ Always check `.ok` before accessing `.value`.
 - 🚦 **isFlaky()** — CI gates, quick checks (default: 5 runs, faster)
 - 📦 **compileDetector()** — Repeated runs, progressive strategies
 
+#### Custom Output Formatting
+
+The library exports formatters for custom output:
+
+```typescript
+import { detect, formatReport } from './src/index.js';
+
+const result = await detect({ test: 'npm test', runs: 10 });
+
+if (result.ok) {
+  // Format as human-readable text
+  const textOutput = formatReport(result.value, 'text');
+  console.log(textOutput);
+
+  // Or get minimal output
+  const minimalOutput = formatReport(result.value, 'minimal');
+  if (minimalOutput) {
+    console.log('Flaky tests:', minimalOutput);
+  }
+}
+```
+
 See [examples/library-api.ts](examples/library-api.ts) for complete examples.
 
 ## CLI Options
 
 - `-t, --test <command>` — Test command to execute (required)
 - `-r, --runs <number>` — Number of times to run the test (default: 10, max: 1000)
+- `-f, --format <format>` — Output format: `json` (default), `text`, or `minimal`
 - `-v, --verbose` — Enable verbose output showing each test run
 - `-h, --help` — Show help message
 
 ## Output Format
 
-The tool outputs a JSON report with the following structure:
+The tool supports three output formats via the `--format` flag:
+
+### JSON Format (default)
+
+Complete machine-readable report (backward compatible):
 
 ```json
 {
@@ -206,6 +239,48 @@ The tool outputs a JSON report with the following structure:
     // ... more run results
   ]
 }
+```
+
+### Text Format (`--format text`)
+
+Human-readable output with visual indicators:
+
+```
+🔍 Test Flakiness Detection Report
+══════════════════════════════════════════════════
+
+📊 Summary
+  Total Runs: 10
+  Passed: 7
+  Failed: 3
+
+⚠️  Flaky Tests Detected
+
+Flaky Tests:
+  • Test Suite
+    Passed: 7/10 (70.0%)
+    Failed: 3/10 (30.0%)
+```
+
+### Minimal Format (`--format minimal`)
+
+Only flaky test names, one per line (perfect for piping):
+
+```
+Test Suite
+Another Flaky Test
+```
+
+**Use cases:**
+```bash
+# Get list of flaky tests
+flaky --test "npm test" --format minimal
+
+# Count flaky tests
+flaky --test "npm test" --format minimal | wc -l
+
+# Save to file for later analysis
+flaky --test "npm test" --format minimal > flaky-tests.txt
 ```
 
 ## Exit Codes
@@ -244,7 +319,7 @@ jobs:
         run: npx tsx examples/ci-integration.ts github-actions
 ```
 
-**Nightly Flakiness Report** (comprehensive detection):
+**Nightly Flakiness Report** (comprehensive detection with human-readable summary):
 ```yaml
 name: Nightly Flakiness Check
 on:
@@ -257,13 +332,40 @@ jobs:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
       - run: npm ci
-      - name: Deep flakiness detection
+      - name: Deep flakiness detection (JSON report)
         run: npx tsx examples/ci-integration.ts github-actions-full
+      - name: Generate human-readable summary
+        run: flaky --test "npm test" --runs 20 --format text > summary.txt
       - uses: actions/upload-artifact@v4
         if: always()
         with:
           name: flakiness-report
-          path: flakiness-report.json
+          path: |
+            flakiness-report.json
+            summary.txt
+```
+
+**Minimal Format for CI Scripts**:
+```yaml
+name: Flakiness Gate
+on: [pull_request]
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+      - run: npm ci
+      - name: Check for flaky tests
+        run: |
+          FLAKY_TESTS=$(flaky --test "npm test" --format minimal)
+          if [ -n "$FLAKY_TESTS" ]; then
+            echo "::error::Flaky tests detected:"
+            echo "$FLAKY_TESTS" | while read test; do
+              echo "::error::  - $test"
+            done
+            exit 1
+          fi
 ```
 
 ### GitLab CI
@@ -359,6 +461,26 @@ This will show:
 ...
 [INFO] Completed 5 runs: 4 passed, 1 failed
 [WARN] Detected flaky tests!
+```
+
+### With Human-Readable Output
+
+```bash
+flaky --test "npm test" --runs 10 --format text
+```
+
+### With Minimal Output (CI/CD)
+
+```bash
+# Quick check - just get flaky test names
+flaky --test "npm test" --format minimal
+
+# Count flaky tests in CI
+FLAKY_COUNT=$(flaky --test "npm test" --format minimal | wc -l)
+if [ "$FLAKY_COUNT" -gt 0 ]; then
+  echo "Found $FLAKY_COUNT flaky tests"
+  exit 1
+fi
 ```
 
 ## Example Outputs

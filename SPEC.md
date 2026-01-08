@@ -174,19 +174,30 @@ async function detectFlakiness(config: Config): Promise<FlakinessReport>;
 
 ### CLI Interface
 
+**Phase 3 Enhancement:** Multiple output formats for different use cases (json, text, minimal).
+
 ```
 Usage: test-flakiness-detector [options]
+       flaky [options]
 
 Options:
   -t, --test <command>   Test command to execute (required)
   -r, --runs <number>    Number of times to run the test (default: 10)
+  -f, --format <format>  Output format: json, text, minimal (default: json)
   -v, --verbose          Enable verbose output
   -h, --help             Show help message
 
+Output Formats:
+  json     - Complete JSON report (default, machine-readable)
+  text     - Human-readable text output
+  minimal  - Only flaky test names (one per line)
+
 Examples:
-  test-flakiness-detector --test "npm test"
-  test-flakiness-detector --test "npm test" --runs 20
-  test-flakiness-detector --test "cargo test" --runs 15 --verbose
+  flaky --test "npm test"
+  flaky --test "npm test" --format text
+  flaky --test "npm test" --format minimal
+  flaky --test "npm test" --runs 20
+  flaky --test "cargo test" --runs 15 --verbose
 ```
 
 ### Input Format
@@ -196,11 +207,16 @@ Examples:
 
 **Optional:**
 - `runs`: Integer between 1 and 1000 (inclusive)
+- `format`: Output format: `json` (default), `text`, or `minimal`
 - `verbose`: Boolean flag
 
 ### Output Format
 
-JSON object on stdout:
+**Phase 3 Enhancement:** Three output formats for different use cases.
+
+#### Format: JSON (default)
+
+Complete JSON report on stdout (machine-readable, default format):
 
 **Success (no flaky tests):**
 ```json
@@ -252,6 +268,70 @@ JSON object on stdout:
   "runs": [],
   "error": "Test command must be a non-empty string"
 }
+```
+
+#### Format: Text
+
+Human-readable text output on stdout (`--format text`):
+
+**Success (no flaky tests):**
+```
+🔍 Test Flakiness Detection Report
+══════════════════════════════════════════════════
+
+📊 Summary
+  Total Runs: 10
+  Passed: 10
+  Failed: 0
+
+✅ No flakiness detected (all tests passed)
+```
+
+**Success (flaky tests detected):**
+```
+🔍 Test Flakiness Detection Report
+══════════════════════════════════════════════════
+
+📊 Summary
+  Total Runs: 10
+  Passed: 7
+  Failed: 3
+
+⚠️  Flaky Tests Detected
+
+Flaky Tests:
+  • Test Suite
+    Passed: 7/10 (70.0%)
+    Failed: 3/10 (30.0%)
+```
+
+#### Format: Minimal
+
+Only flaky test names on stdout, one per line (`--format minimal`):
+
+**Success (no flaky tests):**
+```
+(empty output)
+```
+
+**Success (flaky tests detected):**
+```
+Test Suite
+Another Flaky Test
+```
+
+**Use case:** Suitable for piping to other commands or CI/CD scripts.
+
+**Example:**
+```bash
+# Get list of flaky tests
+flaky --test "npm test" --format minimal
+
+# Count flaky tests
+flaky --test "npm test" --format minimal | wc -l
+
+# Save flaky tests to file
+flaky --test "npm test" --format minimal > flaky-tests.txt
 ```
 
 ## Behavior
