@@ -32,6 +32,65 @@ npm run test:fuzzy      # Fuzzy input tests
 - ES modules with `node:` prefix for built-ins
 - See main repo for full [PRINCIPLES.md](https://github.com/tuulbelt/tuulbelt/blob/main/PRINCIPLES.md)
 
+## API Design (Phase 1 Enhancement)
+
+**Multi-tier API following Property Validator gold standard:**
+
+### 1. `detect()` - Full Detection API
+- **Purpose:** Comprehensive flakiness detection with detailed reports
+- **Default runs:** 10
+- **Returns:** `Result<DetectionReport>` (non-throwing)
+- **Use case:** Debugging, analysis, generating reports
+- **Implementation:** `src/index.ts` lines 198-243
+
+### 2. `isFlaky()` - Fast Boolean Check
+- **Purpose:** Quick CI gate (optimized for speed)
+- **Default runs:** 5 (fewer runs = faster)
+- **Returns:** `Result<boolean>` (non-throwing)
+- **Use case:** CI/CD pipeline gates, quick checks
+- **Implementation:** `src/index.ts` lines 248-285
+
+### 3. `compileDetector()` - Pre-compiled Detector
+- **Purpose:** Cache detector config for repeated use
+- **Returns:** `CompiledDetector` object with `run(runs)` method
+- **Use case:** Progressive detection, multiple run counts
+- **Implementation:** `src/index.ts` lines 290-327
+
+### Result Type Pattern
+All APIs use non-throwing `Result<T>` pattern:
+```typescript
+type Result<T> =
+  | { ok: true; value: T }
+  | { ok: false; error: Error };
+```
+
+**Why:** Eliminates try-catch boilerplate, forces error handling at call site.
+
+### Exit Code Separation (Phase 1)
+- **0:** Success (no flaky tests found)
+- **1:** Flaky tests detected (fail the build)
+- **2:** Invalid arguments (notify developer)
+
+**Why:** CI/CD can distinguish between flakiness and configuration errors.
+
+### Tree-Shaking Support (Phase 1)
+Package.json exports field enables bundlers to eliminate unused APIs:
+```json
+{
+  "exports": {
+    ".": {
+      "types": "./src/index.ts",
+      "import": "./src/index.ts"
+    }
+  }
+}
+```
+
+**Why:** Users importing only `isFlaky()` don't bundle `detect()` or `compileDetector()` code.
+
+### Backward Compatibility
+Legacy `detectFlakiness()` API preserved for existing code (deprecated in docs).
+
 ## Dependencies
 
 This tool uses [CLI Progress Reporting](https://github.com/tuulbelt/cli-progress-reporting) as a **required dependency** for progress tracking.

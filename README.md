@@ -71,33 +71,104 @@ flaky --help
 
 ### As a Library
 
-```typescript
-import { detectFlakiness } from './src/index.js';
+**Three-tier API design** following the [Property Validator](https://github.com/tuulbelt/property-validator) gold standard:
 
-const report = await detectFlakiness({
-  testCommand: 'npm test',
-  runs: 10,
-  verbose: false
+#### 1. `detect()` - Full Detection with Detailed Report
+
+Use when you need detailed statistics, individual run results, and comprehensive reports.
+
+```typescript
+import { detect } from './src/index.js';
+
+const result = await detect({
+  test: 'npm test',
+  runs: 20,
+  verbose: true,
+  threshold: 0.01  // Flag tests with ≥1% failure rate
 });
 
-if (report.success) {
-  console.log(`Total runs: ${report.totalRuns}`);
-  console.log(`Passed: ${report.passedRuns}, Failed: ${report.failedRuns}`);
+if (!result.ok) {
+  console.error('Detection failed:', result.error.message);
+  process.exit(2);
+}
 
-  if (report.flakyTests.length > 0) {
-    console.log('\nFlaky tests detected:');
-    report.flakyTests.forEach(test => {
-      console.log(`  ${test.testName}: ${test.failureRate.toFixed(1)}% failure rate`);
-      console.log(`    Passed: ${test.passed}/${test.totalRuns}`);
-      console.log(`    Failed: ${test.failed}/${test.totalRuns}`);
-    });
-  } else {
-    console.log('No flaky tests detected');
-  }
-} else {
-  console.error(`Error: ${report.error}`);
+const report = result.value;
+console.log(`Total runs: ${report.totalRuns}`);
+console.log(`Passed: ${report.passedRuns}, Failed: ${report.failedRuns}`);
+
+if (report.flakyTests.length > 0) {
+  console.log('\nFlaky tests detected:');
+  report.flakyTests.forEach(test => {
+    console.log(`  ${test.testName}: ${test.failureRate}% failure rate`);
+  });
 }
 ```
+
+#### 2. `isFlaky()` - Fast Boolean Check for CI Gates
+
+Use when you need a quick yes/no answer (optimized for speed with fewer runs).
+
+```typescript
+import { isFlaky } from './src/index.js';
+
+const result = await isFlaky({
+  test: 'npm test',
+  runs: 5  // Faster: default is 5 for quick feedback
+});
+
+if (!result.ok) {
+  console.error('Check failed:', result.error.message);
+  process.exit(2);
+}
+
+if (result.value) {
+  console.error('⚠️ Flakiness detected!');
+  process.exit(1);
+} else {
+  console.log('✅ No flakiness detected');
+  process.exit(0);
+}
+```
+
+#### 3. `compileDetector()` - Pre-compiled Detector for Reuse
+
+Use when you need to run the same test multiple times with different run counts (caching optimization).
+
+```typescript
+import { compileDetector } from './src/index.js';
+
+// Compile once
+const detector = compileDetector({
+  test: 'npm test',
+  verbose: false,
+  threshold: 0.01
+});
+
+// Reuse with different run counts
+const quick = await detector.run(5);
+const standard = await detector.run(10);
+const thorough = await detector.run(20);
+
+if (thorough.ok && thorough.value.flakyTests.length > 0) {
+  console.log('Flakiness confirmed over 20 runs');
+}
+```
+
+**Result Type Pattern**: All APIs use `Result<T>` for non-throwing error handling:
+```typescript
+type Result<T> =
+  | { ok: true; value: T }
+  | { ok: false; error: Error };
+```
+
+Always check `.ok` before accessing `.value`.
+
+**API Selection Guide**:
+- 📊 **detect()** — Detailed reports, debugging, analysis (default: 10 runs)
+- 🚦 **isFlaky()** — CI gates, quick checks (default: 5 runs, faster)
+- 📦 **compileDetector()** — Repeated runs, progressive strategies
+
+See [examples/library-api.ts](examples/library-api.ts) for complete examples.
 
 ## CLI Options
 
@@ -139,8 +210,119 @@ The tool outputs a JSON report with the following structure:
 
 ## Exit Codes
 
-- `0` — Detection completed successfully and no flaky tests found
-- `1` — Either invalid arguments, execution error, or flaky tests detected
+- `0` — Success: Detection completed, no flaky tests found
+- `1` — Flaky Detected: One or more flaky tests found
+- `2` — Invalid Args: Invalid arguments or validation error
+
+**Example:**
+```bash
+flaky --test "npm test" --runs 10
+echo $?  # 0 = no flaky, 1 = flaky found, 2 = invalid args
+```
+
+This separation enables better CI/CD integration: distinguish between flakiness (exit 1, fail the build) and configuration errors (exit 2, notify developer).
+
+## CI Integration
+
+Integrate flakiness detection into your CI/CD pipelines:
+
+### GitHub Actions
+
+**Quick CI Gate** (fails PR if flaky tests detected):
+```yaml
+name: Test
+on: [push, pull_request]
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+      - run: npm ci
+      - run: npm test
+      - name: Check for flaky tests
+        run: npx tsx examples/ci-integration.ts github-actions
+```
+
+**Nightly Flakiness Report** (comprehensive detection):
+```yaml
+name: Nightly Flakiness Check
+on:
+  schedule:
+    - cron: '0 2 * * *'  # 2 AM daily
+jobs:
+  flakiness-check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+      - run: npm ci
+      - name: Deep flakiness detection
+        run: npx tsx examples/ci-integration.ts github-actions-full
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: flakiness-report
+          path: flakiness-report.json
+```
+
+### GitLab CI
+
+```yaml
+test:
+  stage: test
+  script:
+    - npm ci
+    - npm test
+    - npx tsx examples/ci-integration.ts gitlab-ci
+  artifacts:
+    when: always
+    paths:
+      - flakiness-report.json
+```
+
+### Jenkins
+
+```groovy
+pipeline {
+  agent any
+  stages {
+    stage('Test') {
+      steps {
+        sh 'npm ci'
+        sh 'npm test'
+      }
+    }
+    stage('Flakiness Check') {
+      steps {
+        sh 'npx tsx examples/ci-integration.ts jenkins'
+        archiveArtifacts artifacts: 'flakiness-report.json'
+      }
+    }
+  }
+}
+```
+
+### CircleCI
+
+```yaml
+version: 2.1
+jobs:
+  test:
+    docker:
+      - image: cimg/node:20.11
+    steps:
+      - checkout
+      - run: npm ci
+      - run: npm test
+      - run:
+          name: Check for flaky tests
+          command: npx tsx examples/ci-integration.ts circleci
+      - store_artifacts:
+          path: flakiness-report.json
+```
+
+**See [examples/ci-integration.ts](examples/ci-integration.ts) for complete CI/CD integration examples.**
 
 ## Examples
 
