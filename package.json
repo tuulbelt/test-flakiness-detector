@@ -32,7 +32,10 @@
     "test:security-limits": "node --import tsx --test test/security-limits.test.ts",
     "test:edge-cases": "node --import tsx --test test/edge-cases.test.ts",
     "test:watch": "node --import tsx --test --watch test/index.test.ts test/integration.test.ts test/stress.test.ts test/fuzzy.test.ts test/formatters.test.ts test/streaming.test.ts test/threshold.test.ts test/security-limits.test.ts test/edge-cases.test.ts",
-    "bench": "node --import tsx benchmarks/index.bench.ts"
+    "bench": "node --import tsx benchmarks/index.bench.ts",
+    "bench:ci": "node --import tsx benchmarks/ci/bench-ci.ts",
+    "bench:compare": "node --import tsx benchmarks/ci/compare-baseline.ts",
+    "bench:save-baseline": "npm run --silent bench:ci | npm run --silent bench:compare -- --save"
   },
   "keywords": [
     "tuulbelt",
