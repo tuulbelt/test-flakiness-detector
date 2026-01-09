@@ -42,7 +42,7 @@ features:
   - icon:
       src: /icons/settings.svg
     title: Configurable
-    details: Control number of runs (1-1000), enable verbose logging, and customize detection parameters.
+    details: Control number of runs (1-1000), set flakiness threshold (0-100%), enable verbose logging, and customize detection parameters.
 
   - icon:
       src: /icons/shield.svg
@@ -52,7 +52,7 @@ features:
   - icon:
       src: /icons/rocket.svg
     title: Production Ready
-    details: 107+ tests covering unit, integration, performance, and stress scenarios. Battle-tested and reliable.
+    details: 293 tests covering unit, integration, performance, stress, security, and edge cases. Battle-tested and reliable.
 
   - icon:
       src: /icons/book.svg
@@ -66,6 +66,12 @@ Detect flaky tests in just one command:
 
 ```bash
 flaky --test "npm test" --runs 10
+```
+
+With threshold to ignore rare failures (recommended for CI):
+
+```bash
+flaky --test "npm test" --runs 20 --threshold 10
 ```
 
 Get a detailed JSON report:

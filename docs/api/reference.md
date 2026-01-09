@@ -14,6 +14,7 @@ async function detectFlakiness(config: Config): Promise<FlakinessReport>
 
 - `config.testCommand` (string, required) - Test command to execute
 - `config.runs` (number, optional) - Number of runs (default: 10, max: 1000)
+- `config.threshold` (number, optional) - Flakiness threshold 0-100% (default: 0, any failure = flaky)
 - `config.verbose` (boolean, optional) - Enable verbose logging (default: false)
 
 ### Returns
@@ -37,9 +38,11 @@ async function detectFlakiness(config: Config): Promise<FlakinessReport>
 ```typescript
 import { detectFlakiness } from './src/index.js';
 
+// With threshold to ignore rare failures
 const report = await detectFlakiness({
   testCommand: 'npm test',
   runs: 20,
+  threshold: 10,  // Only flag tests with >10% failure rate
   verbose: true
 });
 

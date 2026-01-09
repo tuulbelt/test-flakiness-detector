@@ -7,6 +7,33 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+- **MIGRATION.md guide** covering all version migrations (v0.4.0 ← v0.1.0)
+  - Threshold parameter migration with examples and edge cases
+  - Streaming API, output formats, and multi-tier API migrations
+  - Version history table and troubleshooting
+- **Benchmark CI infrastructure** following property-validator gold standard:
+  - `benchmarks/ci/bench-ci.ts` - CI-optimized benchmarks with tatami-ng
+  - `benchmarks/ci/compare-baseline.ts` - Regression detection (15% threshold)
+  - `.github/workflows/benchmark.yml` - PR regression detection
+  - `.github/workflows/benchmark-update-baseline.yml` - Auto-baseline updates
+  - Multi-Node matrix (18, 20, 22), Slack notifications, 90-day retention
+- **62 new tests** for production readiness:
+  - `test/security-limits.test.ts` - 32 tests for input validation edge cases
+  - `test/edge-cases.test.ts` - 30 tests for boundary conditions
+- **Enhanced error validation** with regex patterns (following property-validator pattern)
+- **Performance documentation** in README with overhead metrics
+
+### Changed
+- Test count: 231 → 293 tests (+27%)
+- All public API functions have comprehensive @example JSDoc blocks
+- VitePress documentation updated with threshold parameter across all pages
+
+### Documentation
+- README: Enhanced Performance section with overhead metrics
+- VitePress: CLI usage, API reference, and index.md updated with threshold examples
+- MIGRATION.md: Complete guide for all version upgrades
+
 ## [0.4.0] - 2026-01-08
 
 ### Added
