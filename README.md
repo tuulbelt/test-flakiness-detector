@@ -3,10 +3,10 @@
 # Test Flakiness Detector / `flaky`
 
 [![Tests](https://github.com/tuulbelt/test-flakiness-detector/actions/workflows/test.yml/badge.svg)](https://github.com/tuulbelt/test-flakiness-detector/actions/workflows/test.yml)
-![Version](https://img.shields.io/badge/version-0.1.0-blue)
+![Version](https://img.shields.io/badge/version-0.4.0-blue)
 ![Node](https://img.shields.io/badge/node-%3E%3D18.0.0-brightgreen)
 ![Dogfooded](https://img.shields.io/badge/dogfooded-🐕-purple)
-![Tests](https://img.shields.io/badge/tests-132%2B%20passing-success)
+![Tests](https://img.shields.io/badge/tests-293%2B%20passing-success)
 [![License](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
 
 Detect unreliable tests by running them multiple times and tracking failure rates.
