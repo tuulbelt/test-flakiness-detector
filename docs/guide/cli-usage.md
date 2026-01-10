@@ -26,6 +26,22 @@ flaky --test "npm test"
 flaky --test "npm test" --runs 20
 ```
 
+### `--threshold <percent>`
+
+**Optional.** Flakiness threshold (0-100%) to ignore low-frequency failures. Default: `0` (any failure = flaky)
+
+```bash
+# Only flag tests with >10% failure rate
+flaky --test "npm test" --runs 20 --threshold 10
+```
+
+**Common values:**
+- `0` (default) — Strict: any failure is flagged as flaky
+- `5-10` — Ignore rare infrastructure failures
+- `15-25` — Tolerate occasional issues in unstable environments
+
+**How it works:** A test is flaky if `failureRate > threshold`
+
 ### `--verbose`
 
 **Optional.** Enable verbose output showing each run's result. Default: `false`
@@ -47,6 +63,15 @@ flaky --test "npm test" --runs 10
 ```bash
 flaky --test "npm test" --runs 20 --verbose
 ```
+
+### With Threshold (Ignore Rare Failures)
+
+```bash
+# Ignore failures <10% (recommended for CI)
+flaky --test "npm test" --runs 20 --threshold 10
+```
+
+This is useful for CI environments with occasional infrastructure issues. A test must fail >10% of the time to be flagged as flaky.
 
 ### Different Test Frameworks
 
@@ -113,7 +138,8 @@ The tool outputs JSON to stdout:
 ```yaml
 - name: Detect flaky tests
   run: |
-    flaky --test "npm test" --runs 20 > flakiness-report.json
+    # Ignore failures <10% (infrastructure tolerance)
+    flaky --test "npm test" --runs 20 --threshold 10 > flakiness-report.json
 
 - name: Check for flakiness
   run: |

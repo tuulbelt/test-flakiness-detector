@@ -8,21 +8,134 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Added
-- Initial project scaffolding
-- TypeScript configuration with strict mode
-- Node.js native test runner setup
-- Basic project structure
+- **MIGRATION.md guide** covering all version migrations (v0.4.0 ← v0.1.0)
+  - Threshold parameter migration with examples and edge cases
+  - Streaming API, output formats, and multi-tier API migrations
+  - Version history table and troubleshooting
+- **Benchmark CI infrastructure** following property-validator gold standard:
+  - `benchmarks/ci/bench-ci.ts` - CI-optimized benchmarks with tatami-ng
+  - `benchmarks/ci/compare-baseline.ts` - Regression detection (15% threshold)
+  - `.github/workflows/benchmark.yml` - PR regression detection
+  - `.github/workflows/benchmark-update-baseline.yml` - Auto-baseline updates
+  - Multi-Node matrix (18, 20, 22), Slack notifications, 90-day retention
+- **62 new tests** for production readiness:
+  - `test/security-limits.test.ts` - 32 tests for input validation edge cases
+  - `test/edge-cases.test.ts` - 30 tests for boundary conditions
+- **Enhanced error validation** with regex patterns (following property-validator pattern)
+- **Performance documentation** in README with overhead metrics
 
-## [0.1.0] - YYYY-MM-DD (Not Released)
+### Changed
+- Test count: 231 → 293 tests (+27%)
+- All public API functions have comprehensive @example JSDoc blocks
+- VitePress documentation updated with threshold parameter across all pages
+
+### Documentation
+- README: Enhanced Performance section with overhead metrics
+- VitePress: CLI usage, API reference, and index.md updated with threshold examples
+- MIGRATION.md: Complete guide for all version upgrades
+
+## [0.4.0] - 2026-01-08
 
 ### Added
-- Core functionality (TODO: describe main features)
-- Comprehensive test suite
-- API documentation
-- Usage examples
+- **Configurable flakiness threshold** to ignore low-frequency failures:
+  - New `threshold` parameter (0-100%) in all APIs
+  - CLI `--threshold <percent>` flag
+  - Default threshold=0 (any failure = flaky) maintains backward compatibility
+  - Formula: Test is flaky if `failureRate > threshold`
+  - Support for decimal values (e.g., 12.5)
+- **Threshold validation**: Range 0-100, finite number check
+- **19 new threshold tests**: Default behavior, various values, edge cases, validation, API integration
+- **Comprehensive documentation**: SPEC.md Threshold Behavior section, README examples
+
+### Changed
+- Test count: 212 → 231 tests (+9%)
 
 ### Implementation Notes
-- Zero runtime dependencies
+- Backward compatible: default threshold=0 preserves existing behavior
+- Use cases: Ignore infrastructure failures (10-20%), tolerate unstable environments (25-50%)
+
+## [0.3.0] - 2026-01-08
+
+### Added
+- **Streaming API** for real-time progress monitoring:
+  - `ProgressEvent` type union with 4 event types (start, run-start, run-complete, complete)
+  - Optional `onProgress` callback in all API functions
+  - CLI `--stream` flag for NDJSON output
+  - Error-resistant: callback errors don't crash detector
+- **25 new streaming tests**: Event emission, order, data integrity, error handling
+- **Real-time event emission** (not buffered)
+- **Type-safe discriminated unions** for event handling
+
+### Changed
+- Test count: 189 → 212 tests (+12%)
+
+### Implementation Notes
+- Events emitted as runs progress for CI/CD integration
+- Callback errors silently caught to prevent detector crashes
+
+## [0.2.5] - 2026-01-08
+
+### Added
+- **Machine-readable output formats** for CI/CD integration:
+  - `--format json` (default) - Complete DetectionReport in JSON
+  - `--format text` - Human-readable text output with emojis
+  - `--format minimal` - Only flaky test names (pipe-friendly)
+- **Formatters module** (`src/formatters.ts`):
+  - `formatJSON()` - Pretty-printed JSON output
+  - `formatText()` - Human-readable text with summary
+  - `formatMinimal()` - Test names only (one per line)
+  - `formatReport()` - Unified formatter with exhaustiveness checking
+- **29 new formatter tests**: JSON, text, minimal formats, error handling
+
+### Changed
+- Test count: 160 → 189 tests (+18%)
+
+### Implementation Notes
+- Proper error display in all output formats
+- Exhaustive pattern matching for format types
+
+## [0.2.0] - 2026-01-08
+
+### Added
+- **Multi-tier API design** following Property Validator gold standard:
+  - `detect()` - Full detection report with Result type
+  - `isFlaky()` - Fast boolean check for CI gates
+  - `compileDetector()` - Pre-compiled detector for repeated use
+- **Result type** for non-throwing error handling: `Result<T> = { ok: true; value: T } | { ok: false; error: Error }`
+- **Type definitions** in `src/types.ts`:
+  - `DetectOptions`, `IsFlakyOptions`, `CompileOptions`
+  - `DetectionReport` (replaces FlakinessReport)
+  - `CompiledDetector` interface
+- **28 new API tests**: Covering all APIs, Result type, backward compatibility
+- **Library usage examples** in CLI help text
+- **Tree-shaking support** via exports field in package.json
+
+### Changed
+- Extracted core detection logic to `src/detector.ts` for modularity
+- Restructured `src/index.ts` to export multiple APIs
+- Exit code 2 for invalid arguments (was 1), exit code 1 reserved for flakiness detection
+- Test count: 132 → 160 tests (+21%)
+
+### Deprecated
+- `FlakinessReport` type name (use `DetectionReport` instead, alias provided for backward compatibility)
+- `detectFlakiness()` function still exported but consider using `detect()` for new code
+
+### Implementation Notes
+- Zero runtime dependencies maintained (only @tuulbelt/cli-progress-reporting)
+- All new APIs follow Result type pattern (non-throwing)
+- Backward compatibility: existing `detectFlakiness()` and CLI behavior preserved
+
+## [0.1.0] - 2025-12-30
+
+### Added
+- Core flakiness detection by running tests multiple times
+- CLI with `--test`, `--runs`, `--verbose` flags
+- Integration with cli-progress-reporting for progress tracking
+- Comprehensive test suite (132 tests)
+- Complete documentation (README, SPEC.md, examples)
+
+### Implementation Notes
+- Zero runtime dependencies (except @tuulbelt/cli-progress-reporting)
 - Uses Node.js built-in modules only
 - TypeScript with strict type checking
 

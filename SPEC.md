@@ -31,17 +31,116 @@ This tool addresses these gaps by automating the detection process.
 
 ## Interface
 
-### Library API
+### Library API (Multi-tier Design)
+
+**Phase 1 Enhancement:** Three-tier API design following Property Validator gold standard.
+
+#### 1. detect() - Full Detection with Result Type
+
+Comprehensive flakiness detection with detailed report and non-throwing error handling.
 
 ```typescript
-import { detectFlakiness, Config, FlakinessReport } from './src/index.js';
+import { detect, DetectOptions, DetectionReport, Result } from '@tuulbelt/test-flakiness-detector';
+
+// Result type (non-throwing error handling)
+type Result<T> =
+  | { ok: true; value: T }
+  | { ok: false; error: Error };
+
+interface DetectOptions {
+  test: string;        // Test command to execute (required)
+  runs?: number;       // Number of runs (default: 10, range: 1-1000)
+  verbose?: boolean;   // Enable progress logging (default: false)
+  threshold?: number;  // Failure rate threshold (default: 0.01)
+}
+
+interface DetectionReport {
+  success: boolean;           // No flaky tests found
+  totalRuns: number;          // Total test executions
+  passedRuns: number;         // Successful runs
+  failedRuns: number;         // Failed runs
+  flakyTests: TestFlakiness[]; // Detected flaky tests
+  runs: TestRunResult[];      // All individual run results
+  error?: string;             // Optional error message
+}
+
+async function detect(options: DetectOptions): Promise<Result<DetectionReport>>;
+```
+
+**Example:**
+```typescript
+const result = await detect({ test: 'npm test', runs: 20 });
+if (result.ok) {
+  console.log(`Found ${result.value.flakyTests.length} flaky tests`);
+} else {
+  console.error('Detection failed:', result.error.message);
+}
+```
+
+#### 2. isFlaky() - Fast Boolean Check
+
+Quick CI gate to determine if tests are flaky (optimized for speed with fewer runs).
+
+```typescript
+import { isFlaky, IsFlakyOptions } from '@tuulbelt/test-flakiness-detector';
+
+interface IsFlakyOptions {
+  test: string;       // Test command to execute (required)
+  runs?: number;      // Number of runs (default: 5, range: 1-1000)
+  threshold?: number; // Failure rate threshold (default: 0.01)
+}
+
+async function isFlaky(options: IsFlakyOptions): Promise<Result<boolean>>;
+```
+
+**Example:**
+```typescript
+const result = await isFlaky({ test: 'npm test' });
+if (result.ok && result.value) {
+  console.error('⚠️ Flakiness detected!');
+  process.exit(1);
+}
+```
+
+#### 3. compileDetector() - Pre-compiled Detector
+
+Pre-compile detector configuration for repeated use (caching optimization).
+
+```typescript
+import { compileDetector, CompileOptions, CompiledDetector } from '@tuulbelt/test-flakiness-detector';
+
+interface CompileOptions {
+  test: string;       // Test command to execute (required)
+  verbose?: boolean;  // Enable progress logging (default: false)
+  threshold?: number; // Failure rate threshold (default: 0.01)
+}
+
+interface CompiledDetector {
+  run(runs: number): Promise<Result<DetectionReport>>;
+  getCommand(): string;
+  getOptions(): CompileOptions;
+}
+
+function compileDetector(options: CompileOptions): CompiledDetector;
+```
+
+**Example:**
+```typescript
+const detector = compileDetector({ test: 'npm test', verbose: true });
+const result1 = await detector.run(10);  // First run
+const result2 = await detector.run(20);  // Reuse configuration
+```
+
+#### 4. detectFlakiness() - Legacy API (Deprecated)
+
+**Status:** Maintained for backward compatibility, use `detect()` for new code.
+
+```typescript
+import { detectFlakiness, Config, FlakinessReport } from '@tuulbelt/test-flakiness-detector';
 
 interface Config {
-  /** Test command to execute (required) */
   testCommand: string;
-  /** Number of times to run the test (default: 10, max: 1000) */
   runs?: number;
-  /** Enable verbose output (default: false) */
   verbose?: boolean;
 }
 
@@ -70,24 +169,39 @@ interface FlakinessReport {
   error?: string;
 }
 
-function detectFlakiness(config: Config): FlakinessReport;
+async function detectFlakiness(config: Config): Promise<FlakinessReport>;
 ```
 
 ### CLI Interface
 
+**Phase 3 Enhancement:** Multiple output formats for different use cases (json, text, minimal).
+
 ```
 Usage: test-flakiness-detector [options]
+       flaky [options]
 
 Options:
-  -t, --test <command>   Test command to execute (required)
-  -r, --runs <number>    Number of times to run the test (default: 10)
-  -v, --verbose          Enable verbose output
-  -h, --help             Show help message
+  -t, --test <command>     Test command to execute (required)
+  -r, --runs <number>      Number of times to run the test (default: 10)
+  --threshold <percent>    Flakiness threshold 0-100 (default: 0, any failure = flaky)
+  -f, --format <format>    Output format: json, text, minimal (default: json)
+  -s, --stream             Stream progress events as newline-delimited JSON
+  -v, --verbose            Enable verbose output
+  -h, --help               Show help message
+
+Output Formats:
+  json     - Complete JSON report (default, machine-readable)
+  text     - Human-readable text output
+  minimal  - Only flaky test names (one per line)
 
 Examples:
-  test-flakiness-detector --test "npm test"
-  test-flakiness-detector --test "npm test" --runs 20
-  test-flakiness-detector --test "cargo test" --runs 15 --verbose
+  flaky --test "npm test"
+  flaky --test "npm test" --format text
+  flaky --test "npm test" --format minimal
+  flaky --test "npm test" --runs 20
+  flaky --test "npm test" --threshold 10
+  flaky --test "npm test" --stream
+  flaky --test "cargo test" --runs 15 --verbose
 ```
 
 ### Input Format
@@ -97,11 +211,16 @@ Examples:
 
 **Optional:**
 - `runs`: Integer between 1 and 1000 (inclusive)
+- `format`: Output format: `json` (default), `text`, or `minimal`
 - `verbose`: Boolean flag
 
 ### Output Format
 
-JSON object on stdout:
+**Phase 3 Enhancement:** Three output formats for different use cases.
+
+#### Format: JSON (default)
+
+Complete JSON report on stdout (machine-readable, default format):
 
 **Success (no flaky tests):**
 ```json
@@ -155,6 +274,147 @@ JSON object on stdout:
 }
 ```
 
+#### Format: Text
+
+Human-readable text output on stdout (`--format text`):
+
+**Success (no flaky tests):**
+```
+🔍 Test Flakiness Detection Report
+══════════════════════════════════════════════════
+
+📊 Summary
+  Total Runs: 10
+  Passed: 10
+  Failed: 0
+
+✅ No flakiness detected (all tests passed)
+```
+
+**Success (flaky tests detected):**
+```
+🔍 Test Flakiness Detection Report
+══════════════════════════════════════════════════
+
+📊 Summary
+  Total Runs: 10
+  Passed: 7
+  Failed: 3
+
+⚠️  Flaky Tests Detected
+
+Flaky Tests:
+  • Test Suite
+    Passed: 7/10 (70.0%)
+    Failed: 3/10 (30.0%)
+```
+
+#### Format: Minimal
+
+Only flaky test names on stdout, one per line (`--format minimal`):
+
+**Success (no flaky tests):**
+```
+(empty output)
+```
+
+**Success (flaky tests detected):**
+```
+Test Suite
+Another Flaky Test
+```
+
+**Use case:** Suitable for piping to other commands or CI/CD scripts.
+
+**Example:**
+```bash
+# Get list of flaky tests
+flaky --test "npm test" --format minimal
+
+# Count flaky tests
+flaky --test "npm test" --format minimal | wc -l
+
+# Save flaky tests to file
+flaky --test "npm test" --format minimal > flaky-tests.txt
+```
+
+#### Format: Streaming (NDJSON)
+
+Real-time progress events as newline-delimited JSON (`--stream`):
+
+**Event Types:**
+
+1. **start** - Emitted once at beginning
+2. **run-start** - Emitted before each test run
+3. **run-complete** - Emitted after each test run with result
+4. **complete** - Emitted once at end with full report
+
+**CLI Output:**
+```bash
+flaky --test "npm test" --runs 3 --stream
+```
+
+**Output (NDJSON format):**
+```json
+{"type":"start","totalRuns":3}
+{"type":"run-start","runNumber":1,"totalRuns":3}
+{"type":"run-complete","runNumber":1,"totalRuns":3,"success":true,"exitCode":0}
+{"type":"run-start","runNumber":2,"totalRuns":3}
+{"type":"run-complete","runNumber":2,"totalRuns":3,"success":false,"exitCode":1}
+{"type":"run-start","runNumber":3,"totalRuns":3}
+{"type":"run-complete","runNumber":3,"totalRuns":3,"success":true,"exitCode":0}
+{"type":"complete","report":{...full DetectionReport...}}
+```
+
+**Library API:**
+```typescript
+import { detect, type ProgressEvent } from 'test-flakiness-detector';
+
+const result = await detect({
+  test: 'npm test',
+  runs: 10,
+  onProgress: (event: ProgressEvent) => {
+    switch (event.type) {
+      case 'start':
+        console.log(`Starting ${event.totalRuns} test runs`);
+        break;
+      case 'run-start':
+        console.log(`Run ${event.runNumber}/${event.totalRuns} starting...`);
+        break;
+      case 'run-complete':
+        const status = event.success ? 'PASS' : 'FAIL';
+        console.log(`Run ${event.runNumber}: ${status} (exit ${event.exitCode})`);
+        break;
+      case 'complete':
+        console.log(`Completed: ${event.report.flakyTests.length} flaky tests`);
+        break;
+    }
+  }
+});
+```
+
+**ProgressEvent Type Definition:**
+```typescript
+type ProgressEvent =
+  | { type: 'start'; totalRuns: number }
+  | { type: 'run-start'; runNumber: number; totalRuns: number }
+  | { type: 'run-complete'; runNumber: number; totalRuns: number; success: boolean; exitCode: number }
+  | { type: 'complete'; report: DetectionReport };
+```
+
+**Key Features:**
+- **Real-time updates**: Events emitted as runs progress (not buffered)
+- **Type-safe**: Discriminated union with TypeScript type narrowing
+- **Error handling**: Callback errors don't crash detector (silently caught)
+- **CLI streaming**: NDJSON format for easy parsing line-by-line
+- **API flexibility**: Optional `onProgress` callback in all API functions
+
+**Use Cases:**
+- CI/CD systems that need real-time progress (e.g., GitHub Actions status updates)
+- Progress bars in CLI wrappers
+- Early detection/cancellation (monitor events and abort if needed)
+- Custom logging/reporting pipelines
+
 ## Behavior
 
 ### Normal Operation
@@ -177,6 +437,97 @@ JSON object on stdout:
 4. **Generate report**
    - Return FlakinessReport with all run results and flakiness statistics
 
+### Threshold Behavior
+
+**Phase 5 Enhancement:** Configurable flakiness threshold to ignore low-frequency failures.
+
+The `threshold` parameter (0-100) controls the flakiness detection sensitivity:
+
+**How It Works:**
+- Threshold is a percentage value from 0 to 100
+- A test is considered flaky if its failure rate **exceeds** the threshold
+- Formula: `failureRate > threshold` (not `>=`)
+- Failure rate is calculated as: `(failedRuns / totalRuns) × 100`
+
+**Default Behavior (threshold=0):**
+- Any failure (>0%) is considered flaky
+- Example: 1 failure in 10 runs (10% failure rate) → flaky
+- Most conservative setting, catches all intermittent failures
+
+**Threshold Values:**
+
+| Threshold | When Test is Flaky | Use Case |
+|-----------|-------------------|----------|
+| 0 (default) | Any failure (>0%) | Maximum sensitivity, catch all flakiness |
+| 10 | >10% failure rate | Ignore rare infrastructure failures |
+| 25 | >25% failure rate | Moderate tolerance for flaky environments |
+| 50 | >50% failure rate | Only flag tests that fail more often than they pass |
+| 99 | >99% failure rate | Essentially disable flakiness detection |
+
+**Examples:**
+
+1. **threshold=0 (default)**
+   ```bash
+   flaky --test "npm test" --runs 10
+   # 9 pass, 1 fail → 10% failure → flaky (10 > 0)
+   ```
+
+2. **threshold=10**
+   ```bash
+   flaky --test "npm test" --threshold 10 --runs 20
+   # 18 pass, 2 fail → 10% failure → NOT flaky (10 ≯ 10)
+   # 17 pass, 3 fail → 15% failure → flaky (15 > 10)
+   ```
+
+3. **threshold=50**
+   ```bash
+   flaky --test "npm test" --threshold 50 --runs 10
+   # 5 pass, 5 fail → 50% failure → NOT flaky (50 ≯ 50)
+   # 4 pass, 6 fail → 60% failure → flaky (60 > 50)
+   ```
+
+**Edge Cases:**
+- **All tests pass** (0% failure) → NOT flaky (regardless of threshold)
+- **All tests fail** (100% failure, but 0 passed) → NOT flaky (consistent failure, not intermittent)
+- **Some pass, some fail** → Check against threshold
+- **Exactly at threshold** → NOT flaky (e.g., 10% failure with threshold=10 is NOT flagged)
+
+**Use Cases:**
+
+1. **CI/CD with unstable infrastructure** (threshold=10-20):
+   - Ignore occasional network timeouts or resource contention
+   - Only flag tests with persistent flakiness
+
+2. **Strict reliability requirements** (threshold=0):
+   - Catch any intermittent failure
+   - Zero tolerance for flakiness
+
+3. **High-latency environments** (threshold=25-50):
+   - Tolerate failures due to external dependencies
+   - Focus on tests that fail more often
+
+**Library API:**
+```typescript
+import { detect } from '@tuulbelt/test-flakiness-detector';
+
+// Ignore failures <15%
+const result = await detect({
+  test: 'npm test',
+  runs: 20,
+  threshold: 15
+});
+
+if (result.ok && result.value.flakyTests.length > 0) {
+  console.log('Tests with >15% failure rate:', result.value.flakyTests);
+}
+```
+
+**Validation:**
+- Threshold must be a finite number
+- Range: 0 to 100 (inclusive)
+- Decimal values allowed (e.g., 12.5)
+- Invalid values return error: "Threshold must be between 0 and 100"
+
 ### Error Cases
 
 | Condition | Behavior |
@@ -185,6 +536,10 @@ JSON object on stdout:
 | Non-string test command | Return error: "Test command must be a non-empty string" |
 | runs < 1 | Return error: "Runs must be between 1 and 1000" |
 | runs > 1000 | Return error: "Runs must be between 1 and 1000" |
+| threshold < 0 | Return error: "Threshold must be between 0 and 100" |
+| threshold > 100 | Return error: "Threshold must be between 0 and 100" |
+| threshold = NaN | Return error: "Threshold must be between 0 and 100" |
+| threshold = Infinity | Return error: "Threshold must be between 0 and 100" |
 | Command not found | Success=true, but run result has success=false, exitCode=127 |
 | Command syntax error | Success=true, but run result has success=false, exitCode≠0 |
 
@@ -320,10 +675,19 @@ Output:
 
 ## Exit Codes
 
-| Code | Meaning |
-|------|---------|
-| 0 | Detection successful, no flaky tests found |
-| 1 | Invalid arguments, execution error, OR flaky tests detected |
+**Phase 1 Enhancement:** Separated invalid arguments from flaky detection.
+
+| Code | Meaning | Description |
+|------|---------|-------------|
+| 0 | Success | Detection successful, no flaky tests found |
+| 1 | Flaky Detected | One or more flaky tests found |
+| 2 | Invalid Args | Invalid arguments or validation error |
+
+**Example:**
+```bash
+flaky --test "npm test" --runs 10
+echo $?  # 0 = no flaky, 1 = flaky found, 2 = invalid args
+```
 
 ## Limitations
 
@@ -361,11 +725,62 @@ Potential improvements (without breaking changes):
    - GitLab CI support
    - Output formats for CI systems (JUnit XML, etc.)
 
-6. **Incremental reporting**:
-   - Stream results as runs complete
-   - Early termination if flakiness detected
-
 ## Changelog
+
+### v0.4.0 - 2026-01-08 (Phase 5)
+
+- **Configurable flakiness threshold** to ignore low-frequency failures:
+  - New `threshold` parameter (0-100) in all APIs (Config, DetectOptions, IsFlakyOptions, CompileOptions)
+  - CLI `--threshold <percent>` flag
+  - Default threshold=0 (any failure = flaky) maintains backward compatibility
+  - Formula: Test is flaky if `failureRate > threshold`
+  - Validation: Must be finite number between 0-100 (inclusive)
+  - Decimal values supported (e.g., 12.5)
+- **Enhanced error handling** for threshold validation
+- **Test coverage**: 231 tests (+19 threshold tests, +9%)
+- **Use cases**: Ignore infrastructure failures, tolerate unstable environments
+- Comprehensive threshold behavior documentation in SPEC.md
+
+### v0.3.0 - 2026-01-08 (Phase 4)
+
+- **Streaming API** for real-time progress monitoring:
+  - `ProgressEvent` type union with 4 event types (start, run-start, run-complete, complete)
+  - Optional `onProgress` callback in all API functions (detect, isFlaky, compileDetector)
+  - CLI `--stream` flag for NDJSON output
+  - Error-resistant: callback errors don't crash detector
+- **Enhanced examples** in help text showing streaming usage
+- **Test coverage**: 212 tests (+25 streaming tests, +13%)
+- Real-time event emission (not buffered)
+- Type-safe discriminated unions for event handling
+
+### v0.2.5 - 2026-01-08 (Phase 3)
+
+- **Machine-readable output formats** for CI/CD integration:
+  - `--format json` (default) - Complete DetectionReport in JSON
+  - `--format text` - Human-readable text output with emojis
+  - `--format minimal` - Only flaky test names (pipe-friendly)
+- **New formatters module** (src/formatters.ts):
+  - `formatJSON()` - Pretty-printed JSON output
+  - `formatText()` - Human-readable text with summary
+  - `formatMinimal()` - Test names only (one per line)
+  - `formatReport()` - Unified formatter with exhaustiveness checking
+- **Error handling improvements** in all formatters
+- **Test coverage**: 189 tests (+29 formatter tests, +18%)
+- Proper error display in all output formats
+- CLI --format flag validation and help text
+
+### v0.2.0 - 2026-01-08 (Phase 1)
+
+- **Multi-tier API design** following Property Validator gold standard:
+  - `detect()` - Full detection with Result type (non-throwing)
+  - `isFlaky()` - Fast boolean check for CI gates
+  - `compileDetector()` - Pre-compiled detector for repeated use
+- **Result type pattern** for non-throwing error handling
+- **Exit code separation**: 0 (success), 1 (flaky), 2 (invalid args)
+- **Tree-shaking support** via exports field in package.json
+- **Test suite expansion**: 132 → 160 tests (+28 API tests, +21%)
+- **Backward compatibility**: Legacy `detectFlakiness()` API preserved
+- Full JSDoc coverage with @example blocks
 
 ### v0.1.0 - 2025-12-29
 
